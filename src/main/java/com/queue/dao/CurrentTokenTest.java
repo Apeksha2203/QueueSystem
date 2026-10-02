@@ -1,0 +1,23 @@
+package com.queue.dao;
+
+public class CurrentTokenTest {
+
+    public static void main(String[] args) {
+
+        QueueDAO queueDAO = new QueueDAO();
+
+        // Test Examination Section
+        int currentToken = queueDAO.getCurrentToken(1);
+
+        if (currentToken > 0) {
+
+            System.out.println("Current token found!");
+            System.out.println("Service ID: 1");
+            System.out.println("Current Token: " + currentToken);
+
+        } else {
+
+            System.out.println("No token is currently being served.");
+        }
+    }
+}

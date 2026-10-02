@@ -1,0 +1,326 @@
+/* ---------- General ---------- */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #1f2937;
+}
+
+button {
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+
+/* ---------- Dashboard ---------- */
+
+.dashboard {
+    min-height: 100vh;
+}
+
+
+/* ---------- Header ---------- */
+
+.dashboard-header {
+    background: #1f2937;
+    color: white;
+    padding: 24px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dashboard-header h1 {
+    font-size: 28px;
+    margin-bottom: 6px;
+}
+
+.dashboard-header p {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+.staff-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.status {
+    background: #dcfce7;
+    color: #166534;
+    padding: 7px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+
+/* ---------- Summary Cards ---------- */
+
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    padding: 30px 40px 20px;
+}
+
+.card {
+    background: white;
+    padding: 22px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.card h3 {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.card p {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+/* ---------- Main Content ---------- */
+
+.dashboard-content {
+    padding: 10px 40px 40px;
+}
+
+.queue-section,
+.service-section,
+.availability-section {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+}
+
+.section-header h2,
+.service-section h2,
+.availability-section h2 {
+    font-size: 20px;
+    margin-bottom: 5px;
+}
+
+.section-header p {
+    color: #64748b;
+    font-size: 14px;
+}
+
+
+/* ---------- Buttons ---------- */
+
+#callNextBtn {
+    background: #2563eb;
+    color: white;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+#callNextBtn:hover {
+    background: #1d4ed8;
+}
+
+.action-btn {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font-weight: bold;
+}
+
+.action-btn:hover {
+    background: #c7d2fe;
+}
+
+
+/* ---------- Queue Table ---------- */
+
+.queue-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.queue-table th {
+    text-align: left;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 13px;
+    padding: 14px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.queue-table td {
+    padding: 15px 14px;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+.queue-status {
+    display: inline-block;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.waiting {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+
+/* ---------- Current Service ---------- */
+
+.current-service {
+    display: flex;
+    align-items: center;
+    gap: 60px;
+    padding-top: 15px;
+}
+
+.current-service div {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.current-service span {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.current-service strong {
+    font-size: 20px;
+}
+
+.service-actions {
+    display: flex;
+    flex-direction: row !important;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.service-actions button {
+    padding: 10px 15px;
+    border-radius: 7px;
+    font-weight: bold;
+}
+
+#startBtn {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+#completeBtn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+#skipBtn {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+
+/* ---------- Availability ---------- */
+
+.availability-controls {
+    display: flex;
+    gap: 12px;
+    margin-top: 15px;
+}
+
+.availability-controls button {
+    padding: 10px 18px;
+    border-radius: 7px;
+    font-weight: bold;
+}
+
+#pauseBtn {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+#resumeBtn {
+    background: #dcfce7;
+    color: #166534;
+}
+
+#checkoutBtn {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+
+/* ---------- Responsive Design ---------- */
+
+@media (max-width: 900px) {
+
+    .summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .current-service {
+        flex-wrap: wrap;
+        gap: 25px;
+    }
+
+    .service-actions {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+
+@media (max-width: 600px) {
+
+    .dashboard-header {
+        padding: 20px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .summary-cards {
+        grid-template-columns: 1fr;
+        padding: 20px;
+    }
+
+    .dashboard-content {
+        padding: 0 20px 20px;
+    }
+
+    .queue-section {
+        overflow-x: auto;
+    }
+
+    .current-service {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .service-actions {
+        flex-wrap: wrap;
+    }
+}

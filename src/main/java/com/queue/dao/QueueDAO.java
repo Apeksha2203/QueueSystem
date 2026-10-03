@@ -9,6 +9,10 @@ import java.sql.ResultSet;
 
 public class QueueDAO {
 
+    // =========================
+    // STUDENT QUEUE OPERATIONS
+    // =========================
+
     public boolean joinQueue(Queue queue) {
 
         String tokenSql =
@@ -25,7 +29,6 @@ public class QueueDAO {
 
             int nextToken;
 
-            // Find next token number
             try (PreparedStatement statement =
                          connection.prepareStatement(tokenSql)) {
 
@@ -38,7 +41,6 @@ public class QueueDAO {
                 }
             }
 
-            // Insert student into queue
             try (PreparedStatement statement =
                          connection.prepareStatement(insertSql)) {
 
@@ -85,45 +87,7 @@ public class QueueDAO {
 
                 if (resultSet.next()) {
 
-                    Queue queue = new Queue();
-
-                    queue.setQueueId(
-                            resultSet.getInt("queue_id")
-                    );
-
-                    queue.setStudentId(
-                            resultSet.getInt("student_id")
-                    );
-
-                    queue.setServiceId(
-                            resultSet.getInt("service_id")
-                    );
-
-                    queue.setTokenNumber(
-                            resultSet.getInt("token_number")
-                    );
-
-                    queue.setStatus(
-                            resultSet.getString("status")
-                    );
-
-                    queue.setJoinedAt(
-                            resultSet.getTimestamp("joined_at")
-                    );
-
-                    queue.setCalledAt(
-                            resultSet.getTimestamp("called_at")
-                    );
-
-                    queue.setStartedAt(
-                            resultSet.getTimestamp("started_at")
-                    );
-
-                    queue.setCompletedAt(
-                            resultSet.getTimestamp("completed_at")
-                    );
-
-                    return queue;
+                    return mapQueue(resultSet);
                 }
             }
 
@@ -155,7 +119,6 @@ public class QueueDAO {
 
             int studentToken;
 
-            // Find student's token
             try (PreparedStatement statement =
                          connection.prepareStatement(tokenSql)) {
 
@@ -173,7 +136,6 @@ public class QueueDAO {
                 }
             }
 
-            // Find student's position
             try (PreparedStatement statement =
                          connection.prepareStatement(positionSql)) {
 
@@ -224,5 +186,285 @@ public class QueueDAO {
         }
 
         return 0;
+    }
+
+    public java.util.List<Queue> getActiveQueue(int serviceId) {
+
+    java.util.List<Queue> queueList =
+            new java.util.ArrayList<>();
+
+    String sql =
+            "SELECT * FROM queue " +
+            "WHERE service_id = ? " +
+            "AND status IN ('WAITING', 'CALLED', 'SERVING') " +
+            "ORDER BY token_number";
+
+    try (
+        Connection connection = DBConnection.getConnection();
+        PreparedStatement statement =
+                connection.prepareStatement(sql)
+    ) {
+
+        statement.setInt(1, serviceId);
+
+        try (ResultSet resultSet =
+                     statement.executeQuery()) {
+
+            while (resultSet.next()) {
+                queueList.add(mapQueue(resultSet));
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return queueList;
+}
+
+
+    // =========================
+    // STAFF QUEUE OPERATIONS
+    // =========================
+
+    public Queue callNext(int serviceId) {
+
+        String findSql =
+                "SELECT * FROM queue " +
+                "WHERE service_id = ? " +
+                "AND status = 'WAITING' " +
+                "ORDER BY token_number ASC " +
+                "LIMIT 1";
+
+        String updateSql =
+                "UPDATE queue " +
+                "SET status = 'CALLED', called_at = CURRENT_TIMESTAMP " +
+                "WHERE queue_id = ?";
+
+        try (Connection connection = DBConnection.getConnection()) {
+
+            connection.setAutoCommit(false);
+
+            try (
+                PreparedStatement findStatement =
+                        connection.prepareStatement(findSql);
+                PreparedStatement updateStatement =
+                        connection.prepareStatement(updateSql)
+            ) {
+
+                findStatement.setInt(1, serviceId);
+
+                try (ResultSet resultSet =
+                             findStatement.executeQuery()) {
+
+                    if (!resultSet.next()) {
+                        connection.rollback();
+                        return null;
+                    }
+
+                    int queueId =
+                            resultSet.getInt("queue_id");
+
+                    updateStatement.setInt(1, queueId);
+
+                    int updated =
+                            updateStatement.executeUpdate();
+
+                    if (updated == 0) {
+                        connection.rollback();
+                        return null;
+                    }
+
+                    connection.commit();
+
+                    return getQueueById(connection, queueId);
+                }
+
+            } catch (Exception e) {
+
+                connection.rollback();
+                throw e;
+
+            } finally {
+
+                connection.setAutoCommit(true);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+
+    public boolean startService(int queueId) {
+
+        String sql =
+                "UPDATE queue " +
+                "SET status = 'SERVING', " +
+                "started_at = CURRENT_TIMESTAMP " +
+                "WHERE queue_id = ? " +
+                "AND status = 'CALLED'";
+
+        try (
+            Connection connection = DBConnection.getConnection();
+            PreparedStatement statement =
+                    connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, queueId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    public boolean completeService(int queueId) {
+
+        String sql =
+                "UPDATE queue " +
+                "SET status = 'COMPLETED', " +
+                "completed_at = CURRENT_TIMESTAMP " +
+                "WHERE queue_id = ? " +
+                "AND status = 'SERVING'";
+
+        try (
+            Connection connection = DBConnection.getConnection();
+            PreparedStatement statement =
+                    connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, queueId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    public boolean skipStudent(int queueId) {
+
+        String sql =
+                "UPDATE queue " +
+                "SET status = 'SKIPPED', " +
+                "completed_at = CURRENT_TIMESTAMP " +
+                "WHERE queue_id = ? " +
+                "AND status IN ('CALLED', 'SERVING')";
+
+        try (
+            Connection connection = DBConnection.getConnection();
+            PreparedStatement statement =
+                    connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, queueId);
+
+            return statement.executeUpdate() > 0;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+    // =========================
+    // HELPER METHODS
+    // =========================
+
+    public Queue getQueueById(int queueId) {
+
+    try (
+        Connection connection = DBConnection.getConnection()
+    ) {
+        return getQueueById(connection, queueId);
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
+    private Queue getQueueById(Connection connection,
+                               int queueId) throws Exception {
+
+        String sql =
+                "SELECT * FROM queue " +
+                "WHERE queue_id = ?";
+
+        try (
+            PreparedStatement statement =
+                    connection.prepareStatement(sql)
+        ) {
+
+            statement.setInt(1, queueId);
+
+            try (ResultSet resultSet =
+                         statement.executeQuery()) {
+
+                if (resultSet.next()) {
+                    return mapQueue(resultSet);
+                }
+            }
+        }
+
+        return null;
+    }
+
+
+    private Queue mapQueue(ResultSet resultSet)
+            throws Exception {
+
+        Queue queue = new Queue();
+
+        queue.setQueueId(
+                resultSet.getInt("queue_id")
+        );
+
+        queue.setStudentId(
+                resultSet.getInt("student_id")
+        );
+
+        queue.setServiceId(
+                resultSet.getInt("service_id")
+        );
+
+        queue.setTokenNumber(
+                resultSet.getInt("token_number")
+        );
+
+        queue.setStatus(
+                resultSet.getString("status")
+        );
+
+        queue.setJoinedAt(
+                resultSet.getTimestamp("joined_at")
+        );
+
+        queue.setCalledAt(
+                resultSet.getTimestamp("called_at")
+        );
+
+        queue.setStartedAt(
+                resultSet.getTimestamp("started_at")
+        );
+
+        queue.setCompletedAt(
+                resultSet.getTimestamp("completed_at")
+        );
+
+        return queue;
     }
 }

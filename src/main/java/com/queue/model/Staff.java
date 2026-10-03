@@ -7,17 +7,19 @@ public class Staff {
     private String email;
     private String password;
     private int serviceId;
+    private int counterId;
 
     public Staff() {
     }
 
     public Staff(int staffId, String staffName, String email,
-                 String password, int serviceId) {
+                 String password, int serviceId, int counterId) {
         this.staffId = staffId;
         this.staffName = staffName;
         this.email = email;
         this.password = password;
         this.serviceId = serviceId;
+        this.counterId = counterId;
     }
 
     public int getStaffId() {
@@ -58,5 +60,13 @@ public class Staff {
 
     public void setServiceId(int serviceId) {
         this.serviceId = serviceId;
+    }
+
+    public int getCounterId() {
+        return counterId;
+    }
+
+    public void setCounterId(int counterId) {
+        this.counterId = counterId;
     }
 }

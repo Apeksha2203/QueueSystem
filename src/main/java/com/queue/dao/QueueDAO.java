@@ -42,7 +42,10 @@ public class QueueDAO {
             }
 
             try (PreparedStatement statement =
-                         connection.prepareStatement(insertSql)) {
+        connection.prepareStatement(
+            insertSql,
+            java.sql.Statement.RETURN_GENERATED_KEYS
+        )) {
 
                 statement.setInt(1, queue.getStudentId());
                 statement.setInt(2, queue.getServiceId());
@@ -50,13 +53,23 @@ public class QueueDAO {
 
                 int rowsInserted = statement.executeUpdate();
 
-                if (rowsInserted > 0) {
+if (rowsInserted > 0) {
 
-                    queue.setTokenNumber(nextToken);
-                    queue.setStatus("WAITING");
+    try (ResultSet generatedKeys =
+                 statement.getGeneratedKeys()) {
 
-                    return true;
-                }
+        if (generatedKeys.next()) {
+            queue.setQueueId(
+                generatedKeys.getInt(1)
+            );
+        }
+    }
+
+    queue.setTokenNumber(nextToken);
+    queue.setStatus("WAITING");
+
+    return true;
+}
             }
 
         } catch (Exception e) {

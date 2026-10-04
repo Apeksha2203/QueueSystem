@@ -30,6 +30,22 @@ public class StaffService {
         return queueDAO.callNext(serviceId);
     }
 
+    public Queue callStudent(int staffId, int queueId) {
+
+    Staff staff = staffDAO.getStaffById(staffId);
+    Queue queue = queueDAO.getQueueById(queueId);
+
+    if (staff == null || queue == null) {
+        return null;
+    }
+
+    if (staff.getServiceId() != queue.getServiceId()) {
+        return null;
+    }
+
+    return queueDAO.callStudent(queueId);
+}
+
     public boolean startService(int staffId, int queueId) {
 
         Staff staff = staffDAO.getStaffById(staffId);
@@ -100,6 +116,19 @@ public boolean updateCounterStatus(int staffId, boolean active) {
     return counterDAO.updateCounterStatus(
         staff.getCounterId(),
         active
+    );
+}
+
+public java.util.List<Queue> getRecentActivity(int staffId) {
+
+    Staff staff = staffDAO.getStaffById(staffId);
+
+    if (staff == null) {
+        return new java.util.ArrayList<>();
+    }
+
+    return queueDAO.getRecentActivity(
+        staff.getServiceId()
     );
 }
 }

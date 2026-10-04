@@ -110,6 +110,70 @@ public class QueueServlet extends HttpServlet {
         response.setCharacterEncoding("UTF-8");
 
         // =========================
+// CALL SPECIFIC STUDENT
+// POST /api/queue/call
+// =========================
+
+if ("/call".equals(path)) {
+
+    int queueId = getQueueId(request);
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        writeError(response, "Staff is not logged in");
+        return;
+    }
+
+    int staffId =
+            (Integer) session.getAttribute("staffId");
+
+    if (queueId <= 0) {
+
+        writeError(
+            response,
+            "Valid queueId is required"
+        );
+
+        return;
+    }
+
+    Queue queue =
+            staffService.callStudent(
+                staffId,
+                queueId
+            );
+
+    if (queue == null) {
+
+        writeError(
+            response,
+            "Unable to call student"
+        );
+
+        return;
+    }
+
+    String json =
+            "{"
+            + "\"success\":true,"
+            + "\"message\":\"Student called successfully\","
+            + "\"data\":{"
+            + "\"queueId\":" + queue.getQueueId() + ","
+            + "\"studentId\":" + queue.getStudentId() + ","
+            + "\"serviceId\":" + queue.getServiceId() + ","
+            + "\"tokenNumber\":" + queue.getTokenNumber() + ","
+            + "\"status\":\"" + queue.getStatus() + "\""
+            + "}"
+            + "}";
+
+    response.getWriter().write(json);
+    return;
+}
+
+        // =========================
         // CALL NEXT
         // POST /api/queue/call-next
         // =========================

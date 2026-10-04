@@ -2,6 +2,11 @@ package com.queue.controller;
 
 import com.queue.model.Staff;
 import com.queue.service.StaffService;
+import com.queue.model.Booking;
+import com.queue.service.AnalyticsService;
+import com.queue.service.BookingService;
+
+import java.util.List;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,11 +21,15 @@ import java.io.IOException;
 public class StaffServlet extends HttpServlet {
 
     private StaffService staffService;
+    private AnalyticsService analyticsService;
+private BookingService bookingService;
 
     @Override
-    public void init() {
-        staffService = new StaffService();
-    }
+public void init() {
+    staffService = new StaffService();
+    analyticsService = new AnalyticsService();
+    bookingService = new BookingService();
+}
 
     // =========================
     // POST /api/staff/login
@@ -222,6 +231,216 @@ public class StaffServlet extends HttpServlet {
 
             return;
         }
+
+        if ("/dashboard-summary".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    Staff staff =
+        staffService.getStaffProfile(staffId);
+
+    if (staff == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff profile not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    // Get active queue for staff's service
+    List<com.queue.model.Queue> activeQueue =
+        staffService.getActiveQueue(staffId);
+
+    int studentsWaiting = 0;
+
+    for (com.queue.model.Queue queue : activeQueue) {
+
+        if ("WAITING".equals(queue.getStatus())) {
+            studentsWaiting++;
+        }
+    }
+
+    // Get analytics
+    int servedToday =
+        analyticsService.getStudentsServedToday();
+
+    double averageWaitMinutes =
+        analyticsService.getAverageWaitingTime();
+
+    double averageServiceMinutes =
+        analyticsService.getAverageServiceTime();
+
+    int noShows =
+        analyticsService.getNoShowCount();
+
+    String peakHour =
+        analyticsService.getPeakHour();
+
+    // Get upcoming bookings for staff's service
+    List<Booking> upcomingBookings =
+        bookingService.getUpcomingBookings(
+            staff.getServiceId()
+        );
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Dashboard summary fetched successfully\","
+        + "\"data\":{"
+        + "\"studentsWaiting\":" + studentsWaiting + ","
+        + "\"servedToday\":" + servedToday + ","
+        + "\"averageWaitMinutes\":" + averageWaitMinutes + ","
+        + "\"averageServiceMinutes\":" + averageServiceMinutes + ","
+        + "\"noShowsToday\":" + noShows + ","
+        + "\"peakHour\":\"" + peakHour + "\","
+        + "\"upcomingBookings\":" + upcomingBookings.size()
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
+
+    return;
+}
+if ("/recent-activity".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    Staff staff =
+        staffService.getStaffProfile(staffId);
+
+    if (staff == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff profile not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    List<com.queue.model.Queue> activityList =
+        staffService.getRecentActivity(staffId);
+
+    StringBuilder json =
+        new StringBuilder();
+
+    json.append("{")
+        .append("\"success\":true,")
+        .append("\"message\":\"Recent activity retrieved\",")
+        .append("\"data\":[");
+
+    boolean firstActivity = true;
+
+    for (com.queue.model.Queue queue : activityList) {
+
+        if (queue.getCalledAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"CALLED\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getCalledAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
+        }
+
+        if (queue.getStartedAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"SERVICE_STARTED\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getStartedAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
+        }
+
+        if (queue.getCompletedAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            String action =
+                "SKIPPED".equals(queue.getStatus())
+                    ? "SKIPPED"
+                    : "COMPLETED";
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"")
+                .append(action)
+                .append("\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getCompletedAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
+        }
+    }
+
+    json.append("]}");
+
+    response.getWriter().write(
+        json.toString()
+    );
+
+    return;
+}
+
 
         if ("/queue".equals(path)) {
 

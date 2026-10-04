@@ -239,6 +239,84 @@ public class BookingService {
     }
 
     /**
+     * Retrieves all upcoming active bookings for a specific service (status = 'BOOKED' for today and future).
+     *
+     * @param serviceId ID of the service
+     * @return List of upcoming Booking objects ordered by date and time
+     */
+    public List<Booking> getUpcomingBookings(int serviceId) {
+        List<Booking> bookings = new ArrayList<>();
+        String sql =
+                "SELECT * FROM bookings " +
+                "WHERE service_id = ? AND status = 'BOOKED' " +
+                "AND (booking_date > CURRENT_DATE " +
+                "     OR (booking_date = CURRENT_DATE AND booking_time >= CURRENT_TIME)) " +
+                "ORDER BY booking_date ASC, booking_time ASC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, serviceId);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Booking b = new Booking();
+                    b.setBookingId(resultSet.getInt("booking_id"));
+                    b.setStudentId(resultSet.getInt("student_id"));
+                    b.setServiceId(resultSet.getInt("service_id"));
+                    b.setBookingDate(resultSet.getDate("booking_date"));
+                    b.setBookingTime(resultSet.getTime("booking_time"));
+                    b.setStatus(resultSet.getString("status"));
+                    b.setCreatedAt(resultSet.getTimestamp("created_at"));
+                    bookings.add(b);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return bookings;
+    }
+
+    /**
+     * Retrieves upcoming bookings for a specific service on a specific date.
+     *
+     * @param serviceId   ID of the service
+     * @param bookingDate Specific date to filter
+     * @return List of Booking objects
+     */
+    public List<Booking> getUpcomingBookings(int serviceId, Date bookingDate) {
+        List<Booking> bookings = new ArrayList<>();
+        String sql =
+                "SELECT * FROM bookings " +
+                "WHERE service_id = ? AND booking_date = ? AND status = 'BOOKED' " +
+                "ORDER BY booking_time ASC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, serviceId);
+            statement.setDate(2, bookingDate);
+            try (ResultSet resultSet = statement.executeQuery()) {
+                while (resultSet.next()) {
+                    Booking b = new Booking();
+                    b.setBookingId(resultSet.getInt("booking_id"));
+                    b.setStudentId(resultSet.getInt("student_id"));
+                    b.setServiceId(resultSet.getInt("service_id"));
+                    b.setBookingDate(resultSet.getDate("booking_date"));
+                    b.setBookingTime(resultSet.getTime("booking_time"));
+                    b.setStatus(resultSet.getString("status"));
+                    b.setCreatedAt(resultSet.getTimestamp("created_at"));
+                    bookings.add(b);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return bookings;
+    }
+
+    /**
      * Retrieves a single booking by booking ID.
      */
     public Booking getBookingById(int bookingId) {

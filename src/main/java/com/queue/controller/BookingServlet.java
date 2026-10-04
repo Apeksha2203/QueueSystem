@@ -23,7 +23,8 @@ import java.util.List;
         "/api/bookings/create",
         "/api/bookings/cancel",
         "/api/bookings/status",
-        "/api/bookings/available-slots"
+        "/api/bookings/available-slots",
+        "/api/bookings/upcoming"
 })
 public class BookingServlet extends HttpServlet {
 
@@ -42,6 +43,8 @@ public class BookingServlet extends HttpServlet {
 
         if ("/api/bookings/available-slots".equals(servletPath) || "available-slots".equalsIgnoreCase(action)) {
             handleAvailableSlots(request, response);
+        } else if ("/api/bookings/upcoming".equals(servletPath) || "upcoming".equalsIgnoreCase(action)) {
+            handleUpcomingBookings(request, response);
         } else if ("/booking-status".equals(servletPath) || "/api/bookings/status".equals(servletPath)) {
             handleBookingStatus(request, response);
         } else {
@@ -195,6 +198,40 @@ public class BookingServlet extends HttpServlet {
                 request.setAttribute("errorMessage", "Invalid request: " + e.getMessage());
                 request.getRequestDispatcher("/booking/booking-status.jsp").forward(request, response);
             }
+        }
+    }
+
+    private void handleUpcomingBookings(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        PrintWriter out = response.getWriter();
+
+        try {
+            int serviceId = Integer.parseInt(request.getParameter("serviceId"));
+            String dateStr = request.getParameter("date");
+
+            List<Booking> upcoming;
+            if (dateStr != null && !dateStr.trim().isEmpty()) {
+                Date bookingDate = Date.valueOf(dateStr.trim());
+                upcoming = bookingService.getUpcomingBookings(serviceId, bookingDate);
+            } else {
+                upcoming = bookingService.getUpcomingBookings(serviceId);
+            }
+
+            StringBuilder sb = new StringBuilder("[");
+            for (int i = 0; i < upcoming.size(); i++) {
+                Booking b = upcoming.get(i);
+                sb.append(formatBookingJson(b));
+                if (i < upcoming.size() - 1) sb.append(",");
+            }
+            sb.append("]");
+
+            out.print(sb.toString());
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            out.print("{\"error\":\"" + escapeJson(e.getMessage()) + "\"}");
         }
     }
 

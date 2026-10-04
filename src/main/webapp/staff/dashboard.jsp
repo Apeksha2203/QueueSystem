@@ -1,196 +1,577 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Staff Dashboard - Queue System</title>
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    <link rel="stylesheet" href="../css/staff.css">
+    <title>Staff Dashboard - Campus Queue</title>
+
+    <link
+        rel="stylesheet"
+        href="../css/staff.css"
+    >
+
 </head>
+
 
 <body>
 
-    <div class="dashboard">
+<div class="dashboard">
 
-        <!-- Header -->
-        <header class="dashboard-header">
+
+    <!-- HEADER -->
+
+    <header class="dashboard-header">
+
+        <div class="brand-section">
+
+            <h1>Campus Queue</h1>
+
+            <p>Staff Operations Console</p>
+
+        </div>
+
+
+        <div class="staff-info">
+
             <div>
-                <h1>Staff Dashboard</h1>
-                <p>Campus Queue Management System</p>
+
+                <strong id="staffName">
+                    Loading...
+                </strong>
+
+                <p id="counterName">
+                    Counter
+                </p>
+
             </div>
 
-            <div class="staff-info">
-                <span>Staff</span>
-                <span class="status">AVAILABLE</span>
-            </div>
-        </header>
+            <span
+                id="onlineStatus"
+                class="status"
+            >
+                ONLINE
+            </span>
+
+        </div>
+
+    </header>
 
 
-        <!-- Dashboard Summary -->
-        <section class="summary-cards">
 
-            <div class="card">
-                <h3>Current Token</h3>
-                <p id="currentToken">--</p>
-            </div>
+    <!-- PAGE INTRO -->
 
-            <div class="card">
-                <h3>Waiting Students</h3>
-                <p id="waitingCount">0</p>
-            </div>
+    <section class="page-intro">
 
-            <div class="card">
-                <h3>Completed Today</h3>
-                <p id="completedCount">0</p>
-            </div>
+        <div>
 
-            <div class="card">
-                <h3>Counter Status</h3>
-                <p id="counterStatus">Available</p>
-            </div>
+            <h2 id="greeting">
+                Welcome
+            </h2>
 
-        </section>
+            <p>
+                Manage your queue and service operations.
+            </p>
+
+        </div>
 
 
-        <!-- Main Content -->
-        <main class="dashboard-content">
+        <div class="date-time">
 
-            <!-- Queue Section -->
-            <section class="queue-section">
+            <strong id="currentDate">
+                —
+            </strong>
 
-                <div class="section-header">
-                    <div>
-                        <h2>Current Queue</h2>
-                        <p>Students waiting for service</p>
-                    </div>
+            <span id="currentTime">
+                —
+            </span>
 
-                    <button id="callNextBtn">
-                        Call Next
-                    </button>
+        </div>
+
+    </section>
+
+
+
+    <!-- SERVICE CONTEXT -->
+
+    <section class="service-context">
+
+        <div>
+
+            <span class="context-label">
+                CURRENT SERVICE
+            </span>
+
+            <strong id="serviceName">
+                —
+            </strong>
+
+        </div>
+
+
+        <div>
+
+            <span class="context-label">
+                COUNTER
+            </span>
+
+            <strong id="counterNameContext">
+                —
+            </strong>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- SUMMARY CARDS -->
+
+    <section class="summary-cards">
+
+        <div class="card">
+            <h3>Students Waiting</h3>
+            <p id="waitingCount">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Served Today</h3>
+            <p id="completedCount">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Average Wait</h3>
+            <p id="averageWait">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Avg Service Time</h3>
+            <p id="averageService">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>No-Shows Today</h3>
+            <p id="noShowCount">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Peak Hour</h3>
+            <p id="peakHour">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Upcoming Bookings</h3>
+            <p id="bookingCount">—</p>
+        </div>
+
+
+        <div class="card">
+            <h3>Active Queue</h3>
+            <p id="queueLength">—</p>
+        </div>
+
+    </section>
+
+
+
+    <main class="dashboard-content">
+
+
+        <!-- LIVE QUEUE -->
+
+        <section class="queue-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Live Queue</h2>
+
+                    <p>
+                        Students currently waiting for service
+                    </p>
+
                 </div>
 
+
+                <button
+                    type="button"
+                    id="callNextBtn"
+                >
+                    Call Next
+                </button>
+
+            </div>
+
+
+            <div
+                id="queueMessage"
+                class="dashboard-message"
+            ></div>
+
+
+            <div class="queue-table-container">
 
                 <table class="queue-table">
 
                     <thead>
-                        <tr>
-                            <th>Token</th>
-                            <th>Student</th>
-                            <th>Service</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
+
+                    <tr>
+
+                        <th>Token</th>
+
+                        <th>Student ID</th>
+
+                        <th>Service ID</th>
+
+                        <th>Status</th>
+
+                        <th>Action</th>
+
+                    </tr>
+
                     </thead>
 
-                    <tbody id="queueTableBody">
 
-                        <tr>
-                            <td>A001</td>
-                            <td>Student 1</td>
-                            <td>Admissions</td>
-                            <td>
-                                <span class="queue-status waiting">
-                                    Waiting
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn">
-                                    Call
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody id="queueBody">
 
-                        <tr>
-                            <td>A002</td>
-                            <td>Student 2</td>
-                            <td>Admissions</td>
-                            <td>
-                                <span class="queue-status waiting">
-                                    Waiting
-                                </span>
-                            </td>
-                            <td>
-                                <button class="action-btn">
-                                    Call
-                                </button>
-                            </td>
-                        </tr>
+                    <tr>
+
+                        <td
+                            colspan="5"
+                            class="loading-cell"
+                        >
+                            Loading queue...
+                        </td>
+
+                    </tr>
 
                     </tbody>
 
                 </table>
 
-            </section>
+            </div>
+
+        </section>
 
 
-            <!-- Current Service -->
-            <section class="service-section">
 
-                <h2>Current Service</h2>
+        <!-- CURRENT SERVICE -->
 
-                <div class="current-service">
+        <section class="service-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Current Service</h2>
+
+                    <p>
+                        Manage the student currently being served
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="current-service">
+
+                <div>
+
+                    <span>Token</span>
+
+                    <strong id="currentToken">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>Student ID</span>
+
+                    <strong id="currentStudent">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>Service</span>
+
+                    <strong id="currentService">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>Expected Time</span>
+
+                    <strong id="currentExpectedTime">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>State</span>
+
+                    <strong
+                        id="serviceState"
+                        class="service-state idle"
+                    >
+                        IDLE
+                    </strong>
+
+                </div>
+
+
+                <div class="service-actions">
+
+                    <button
+                        type="button"
+                        id="startBtn"
+                        disabled
+                    >
+                        Start Service
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="completeBtn"
+                        disabled
+                    >
+                        Complete
+                    </button>
+
+
+                    <button
+                        type="button"
+                        id="skipBtn"
+                        disabled
+                    >
+                        Skip
+                    </button>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- QUEUE INSIGHT -->
+
+        <section class="service-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Queue Insight</h2>
+
+                    <p>
+                        Current queue conditions
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="current-service">
+
+                <div>
+
+                    <span>Queue Length</span>
+
+                    <strong id="queueLengthInsight">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div>
+
+                    <span>Estimated Wait</span>
+
+                    <strong id="estimatedWait">
+                        —
+                    </strong>
+
+                </div>
+
+
+                <div class="insight-wide">
+
+                    <span>Insight</span>
+
+                    <strong id="queueInsight">
+                        Waiting for live queue data...
+                    </strong>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- STAFF AVAILABILITY -->
+
+        <section class="availability-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Staff Availability</h2>
+
+                    <p>
+                        Manage your counter availability
+                    </p>
+
+                </div>
+
+
+                <span
+                    id="availabilityState"
+                    class="availability-badge available"
+                >
+                    AVAILABLE
+                </span>
+
+            </div>
+
+
+            <div class="availability-controls">
+
+                <button
+                    type="button"
+                    id="pauseBtn"
+                >
+                    Pause
+                </button>
+
+
+                <button
+                    type="button"
+                    id="resumeBtn"
+                    disabled
+                >
+                    Resume
+                </button>
+
+
+                <button
+                    type="button"
+                    id="checkoutBtn"
+                >
+                    Check Out
+                </button>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- RECENT ACTIVITY -->
+
+        <section class="service-section">
+
+            <div class="section-header">
+
+                <div>
+
+                    <h2>Recent Activity</h2>
+
+                    <p>
+                        Activity during this dashboard session
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="activityList"
+                class="activity-list"
+            >
+
+                <div class="activity-item">
+
+                    <span class="activity-dot"></span>
 
                     <div>
-                        <span>Current Token</span>
-                        <strong id="serviceToken">--</strong>
-                    </div>
 
-                    <div>
-                        <span>Student</span>
-                        <strong id="serviceStudent">--</strong>
-                    </div>
+                        <strong>
+                            Dashboard loaded
+                        </strong>
 
-                    <div class="service-actions">
-
-                        <button id="startBtn">
-                            Start Service
-                        </button>
-
-                        <button id="completeBtn">
-                            Complete
-                        </button>
-
-                        <button id="skipBtn">
-                            Skip
-                        </button>
+                        <span>
+                            Waiting for live activity
+                        </span>
 
                     </div>
 
                 </div>
 
-            </section>
+            </div>
+
+        </section>
 
 
-            <!-- Availability -->
-            <section class="availability-section">
-
-                <h2>Staff Availability</h2>
-
-                <div class="availability-controls">
-
-                    <button id="pauseBtn">
-                        Pause
-                    </button>
-
-                    <button id="resumeBtn">
-                        Resume
-                    </button>
-
-                    <button id="checkoutBtn">
-                        Check Out
-                    </button>
-
-                </div>
-
-            </section>
-
-        </main>
-
-    </div>
+    </main>
 
 
-    <script src="../js/staff.js"></script>
+
+    <footer class="dashboard-footer">
+
+        <p>
+            Campus Queue Management System
+        </p>
+
+        <p>
+            Staff Operations Dashboard
+        </p>
+
+    </footer>
+
+
+</div>
+
+
+<script src="../js/staff.js"></script>
 
 </body>
+
 </html>

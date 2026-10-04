@@ -1,163 +1,81 @@
 const loginForm = document.getElementById("loginForm");
+const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");
 const passwordInput = document.getElementById("password");
 const togglePassword = document.getElementById("togglePassword");
 
-function showMessage(message, type) {
-    loginMessage.textContent = message;
-    loginMessage.className = "login-message " + type;
-}
 
+// Show / hide password
+togglePassword.addEventListener("click", function () {
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        togglePassword.textContent = "Hide";
+    } else {
+        passwordInput.type = "password";
+        togglePassword.textContent = "Show";
+    }
+
+});
+
+
+// Login
 loginForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
-    const email =
-        document.getElementById("email").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const password = passwordInput.value;
 
-    const password =
-        passwordInput.value;
-
-    if (!email || !password) {
-        showMessage(
-            "Please enter your email and password.",
-            "error"
-        );
-        return;
-    }
-
-    const loginButton =
-        loginForm.querySelector(".login-btn");
-
+    loginMessage.textContent = "";
     loginButton.disabled = true;
     loginButton.textContent = "Logging in...";
 
-    showMessage("", "");
-
     try {
 
-        const formData =
-            new URLSearchParams();
+        const response = await fetch("../api/staff/login", {
+            method: "POST",
 
-        formData.append("email", email);
-        formData.append("password", password);
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
 
-        const response = await fetch(
-            "../api/staff/login",
-            {
-                method: "POST",
+            credentials: "same-origin",
 
-                headers: {
-                    "Content-Type":
-                        "application/x-www-form-urlencoded;charset=UTF-8",
-                    "Accept":
-                        "application/json"
-                },
+            body: new URLSearchParams({
+                email: email,
+                password: password
+            })
+        });
 
-                body: formData.toString(),
+        const result = await response.json();
 
-                credentials: "same-origin",
+        console.log("Login response:", result);
 
-                cache: "no-store"
-            }
-        );
+        if (result.success) {
 
-        const text =
-            await response.text();
+            loginMessage.textContent = "Login successful.";
 
-        console.log(
-            "Login HTTP status:",
-            response.status
-        );
+            window.location.href = "dashboard.jsp";
 
-        console.log(
-            "Login response:",
-            text
-        );
+        } else {
 
-        let result;
+            loginMessage.textContent =
+                result.message || "Invalid email or password.";
 
-        try {
-            result = JSON.parse(text);
-        } catch (error) {
-
-            throw new Error(
-                "Server returned an invalid login response."
-            );
+            loginButton.disabled = false;
+            loginButton.textContent = "Login";
         }
-
-        if (!response.ok) {
-
-            throw new Error(
-                result.message ||
-                "Login request failed."
-            );
-        }
-
-        if (!result.success) {
-
-            showMessage(
-                result.message ||
-                "Invalid email or password.",
-                "error"
-            );
-
-            return;
-        }
-
-        /*
-         * Only redirect after the backend confirms
-         * successful authentication.
-         */
-
-        showMessage(
-            "Login successful. Opening dashboard...",
-            "success"
-        );
-
-        window.location.replace(
-            "dashboard.jsp"
-        );
 
     } catch (error) {
 
-        console.error(
-            "Login error:",
-            error
-        );
+        console.error("Login error:", error);
 
-        showMessage(
-            error.message ||
-            "Unable to connect to the server.",
-            "error"
-        );
-
-    } finally {
+        loginMessage.textContent =
+            "Unable to connect to the server.";
 
         loginButton.disabled = false;
         loginButton.textContent = "Login";
     }
+
 });
-
-
-if (togglePassword) {
-
-    togglePassword.addEventListener(
-        "click",
-        function () {
-
-            const isPassword =
-                passwordInput.type === "password";
-
-            passwordInput.type =
-                isPassword
-                    ? "text"
-                    : "password";
-
-            togglePassword.textContent =
-                isPassword
-                    ? "Hide"
-                    : "Show";
-        }
-    );
-}

@@ -116,7 +116,55 @@ public class AnalyticsService {
     }
 
     /**
-     * Calculates the total count of no-shows from bookings and skipped tickets from queue.
+     * Calculates the count of no-shows and skipped tickets strictly for TODAY.
+     */
+    public int getNoShowsToday() {
+        String sql =
+                "SELECT " +
+                "(SELECT COUNT(*) FROM bookings WHERE status = 'NO_SHOW' AND booking_date = CURRENT_DATE) + " +
+                "(SELECT COUNT(*) FROM queue WHERE status = 'SKIPPED' AND DATE(joined_at) = CURRENT_DATE) AS no_shows_today";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql);
+             ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+                return resultSet.getInt("no_shows_today");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Calculates the count of no-shows and skipped tickets for a specific service for TODAY.
+     */
+    public int getNoShowsToday(int serviceId) {
+        String sql =
+                "SELECT " +
+                "(SELECT COUNT(*) FROM bookings WHERE status = 'NO_SHOW' AND service_id = ? AND booking_date = CURRENT_DATE) + " +
+                "(SELECT COUNT(*) FROM queue WHERE status = 'SKIPPED' AND service_id = ? AND DATE(joined_at) = CURRENT_DATE) AS no_shows_today";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, serviceId);
+            statement.setInt(2, serviceId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getInt("no_shows_today");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    /**
+     * Calculates the total count of no-shows from bookings and skipped tickets from queue (all-time).
      * Uses SQL aggregation.
      */
     public int getNoShowCount() {

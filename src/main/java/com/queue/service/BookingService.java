@@ -317,6 +317,54 @@ public class BookingService {
     }
 
     /**
+     * Retrieves upcoming bookings along with studentName and serviceName via SQL JOIN.
+     * Perfect for Staff UI displays without requiring N+1 queries.
+     *
+     * @param serviceId ID of the service
+     * @return List of Maps containing booking details, student_name, and service_name
+     */
+    public List<java.util.Map<String, Object>> getUpcomingBookingsWithDetails(int serviceId) {
+        List<java.util.Map<String, Object>> list = new ArrayList<>();
+        String sql =
+                "SELECT b.booking_id, b.student_id, b.service_id, b.booking_date, b.booking_time, " +
+                "       b.status, b.created_at, st.student_name, st.email, st.phone, sv.service_name " +
+                "FROM bookings b " +
+                "JOIN students st ON b.student_id = st.student_id " +
+                "JOIN services sv ON b.service_id = sv.service_id " +
+                "WHERE b.service_id = ? AND b.status = 'BOOKED' " +
+                "AND (b.booking_date > CURRENT_DATE " +
+                "     OR (b.booking_date = CURRENT_DATE AND b.booking_time >= CURRENT_TIME)) " +
+                "ORDER BY b.booking_date ASC, b.booking_time ASC";
+
+        try (Connection connection = DBConnection.getConnection();
+             PreparedStatement statement = connection.prepareStatement(sql)) {
+
+            statement.setInt(1, serviceId);
+            try (ResultSet rs = statement.executeQuery()) {
+                while (rs.next()) {
+                    java.util.Map<String, Object> map = new java.util.HashMap<>();
+                    map.put("bookingId", rs.getInt("booking_id"));
+                    map.put("studentId", rs.getInt("student_id"));
+                    map.put("studentName", rs.getString("student_name"));
+                    map.put("email", rs.getString("email"));
+                    map.put("phone", rs.getString("phone"));
+                    map.put("serviceId", rs.getInt("service_id"));
+                    map.put("serviceName", rs.getString("service_name"));
+                    map.put("bookingDate", rs.getDate("booking_date"));
+                    map.put("bookingTime", rs.getTime("booking_time"));
+                    map.put("status", rs.getString("status"));
+                    map.put("createdAt", rs.getTimestamp("created_at"));
+                    list.add(map);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    /**
      * Retrieves a single booking by booking ID.
      */
     public Booking getBookingById(int bookingId) {

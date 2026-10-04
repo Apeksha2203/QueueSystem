@@ -240,6 +240,36 @@ if (rowsInserted > 0) {
     // STAFF QUEUE OPERATIONS
     // =========================
 
+    public Queue callStudent(int queueId) {
+
+    String sql =
+            "UPDATE queue " +
+            "SET status = 'CALLED', " +
+            "called_at = CURRENT_TIMESTAMP " +
+            "WHERE queue_id = ? " +
+            "AND status = 'WAITING'";
+
+    try (
+        Connection connection = DBConnection.getConnection();
+        PreparedStatement statement =
+                connection.prepareStatement(sql)
+    ) {
+
+        statement.setInt(1, queueId);
+
+        int updated = statement.executeUpdate();
+
+        if (updated > 0) {
+            return getQueueById(connection, queueId);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return null;
+}
+
     public Queue callNext(int serviceId) {
 
         String findSql =
@@ -390,6 +420,49 @@ if (rowsInserted > 0) {
 
         return false;
     }
+
+    public java.util.List<Queue> getRecentActivity(int serviceId) {
+
+    java.util.List<Queue> activityList =
+            new java.util.ArrayList<>();
+
+    String sql =
+            "SELECT * FROM queue " +
+            "WHERE service_id = ? " +
+            "AND (" +
+            "called_at IS NOT NULL " +
+            "OR started_at IS NOT NULL " +
+            "OR completed_at IS NOT NULL" +
+            ") " +
+            "ORDER BY " +
+            "COALESCE(completed_at, started_at, called_at) DESC " +
+            "LIMIT 10";
+
+    try (
+        Connection connection = DBConnection.getConnection();
+        PreparedStatement statement =
+                connection.prepareStatement(sql)
+    ) {
+
+        statement.setInt(1, serviceId);
+
+        try (ResultSet resultSet =
+                     statement.executeQuery()) {
+
+            while (resultSet.next()) {
+
+                activityList.add(
+                    mapQueue(resultSet)
+                );
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return activityList;
+}
 
 
     // =========================

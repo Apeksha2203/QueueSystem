@@ -1,11 +1,12 @@
 package com.queue.controller;
 
-import java.io.IOException;
-import java.util.List;
-
-import com.queue.model.Queue;
 import com.queue.model.Staff;
 import com.queue.service.StaffService;
+import com.queue.model.Booking;
+import com.queue.service.AnalyticsService;
+import com.queue.service.BookingService;
+
+import java.util.List;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -14,380 +15,631 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import java.io.IOException;
+
 @WebServlet("/api/staff/*")
 public class StaffServlet extends HttpServlet {
 
     private StaffService staffService;
+    private AnalyticsService analyticsService;
+private BookingService bookingService;
 
     @Override
-    public void init() {
-        staffService = new StaffService();
-    }
+public void init() {
+    staffService = new StaffService();
+    analyticsService = new AnalyticsService();
+    bookingService = new BookingService();
+}
 
-    // =========================================================
-    // POST /api/staff/*
-    // =========================================================
+    // =========================
+    // POST /api/staff/login
+    // =========================
+
     @Override
-    protected void doPost(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
             throws ServletException, IOException {
+
+        String path = request.getPathInfo();
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String path = request.getPathInfo();
-
-        // -----------------------------------------------------
-        // POST /api/staff/login
-        // -----------------------------------------------------
         if ("/login".equals(path)) {
 
             String email = request.getParameter("email");
             String password = request.getParameter("password");
 
-            if (email == null || password == null
-                    || email.isBlank() || password.isBlank()) {
+            if (email == null || password == null ||
+                email.isBlank() || password.isBlank()) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Email and password are required",
-                        null
+                response.getWriter().write(
+                    "{\"success\":false," +
+                    "\"message\":\"Email and password are required\"," +
+                    "\"data\":null}"
                 );
 
                 return;
             }
-
-            email = email.trim();
 
             Staff staff = staffService.login(email, password);
 
-            if (staff == null) {
+            if (staff != null) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Invalid email or password",
-                        null
-                );
+                HttpSession session = request.getSession();
+                session.setAttribute("staffId", staff.getStaffId());
 
-                return;
-            }
-
-            /*
-             * IMPORTANT:
-             * Remove any old session and create a fresh session
-             * after successful authentication.
-             */
-            HttpSession oldSession = request.getSession(false);
-
-            if (oldSession != null) {
-                oldSession.invalidate();
-            }
-
-            HttpSession session = request.getSession(true);
-
-            session.setAttribute(
-                    "staffId",
-                    staff.getStaffId()
-            );
-
-            session.setMaxInactiveInterval(30 * 60);
-
-            String data
-                    = "{"
+                String json =
+                    "{"
+                    + "\"success\":true,"
+                    + "\"message\":\"Staff login successful\","
+                    + "\"data\":{"
                     + "\"staffId\":" + staff.getStaffId() + ","
-                    + "\"staffName\":\"" + escapeJson(staff.getStaffName()) + "\","
-                    + "\"email\":\"" + escapeJson(staff.getEmail()) + "\","
+                    + "\"staffName\":\"" + staff.getStaffName() + "\","
+                    + "\"email\":\"" + staff.getEmail() + "\","
                     + "\"serviceId\":" + staff.getServiceId() + ","
                     + "\"counterId\":" + staff.getCounterId()
+                    + "}"
                     + "}";
 
-            writeResponse(
-                    response,
-                    true,
-                    "Staff login successful",
-                    data
-            );
+                response.getWriter().write(json);
+
+            } else {
+
+                response.getWriter().write(
+                    "{\"success\":false," +
+                    "\"message\":\"Invalid email or password\"," +
+                    "\"data\":null}"
+                );
+            }
 
             return;
         }
 
-        // -----------------------------------------------------
-        // POST /api/staff/counter/status
-        // -----------------------------------------------------
         if ("/counter/status".equals(path)) {
 
-            HttpSession session = request.getSession(false);
+    HttpSession session = request.getSession(false);
 
-            if (session == null
-                    || session.getAttribute("staffId") == null) {
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Staff is not logged in",
-                        null
-                );
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
 
-                return;
-            }
+        return;
+    }
 
-            String activeParameter
-                    = request.getParameter("active");
+    String status =
+        request.getParameter("status");
 
-            if (activeParameter == null) {
+    if (status == null || status.isBlank()) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Active status is required",
-                        null
-                );
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Status is required\"," +
+            "\"data\":null}"
+        );
 
-                return;
-            }
+        return;
+    }
 
-            boolean active
-                    = Boolean.parseBoolean(activeParameter);
+    status = status.toUpperCase();
 
-            int staffId
-                    = (Integer) session.getAttribute("staffId");
+    if (!status.equals("AVAILABLE") &&
+        !status.equals("PAUSED") &&
+        !status.equals("CHECKED_OUT")) {
 
-            boolean updated
-                    = staffService.updateCounterStatus(
-                            staffId,
-                            active
-                    );
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Invalid status. Use AVAILABLE, PAUSED or CHECKED_OUT\"," +
+            "\"data\":null}"
+        );
 
-            if (!updated) {
+        return;
+    }
 
-                writeResponse(
-                        response,
-                        false,
-                        "Failed to update counter status",
-                        null
-                );
+    int staffId =
+        (Integer) session.getAttribute("staffId");
 
-                return;
-            }
+    boolean updated = true;
 
-            String data
-                    = "{\"active\":" + active + "}";
+    if ("AVAILABLE".equals(status)) {
 
-            writeResponse(
-                    response,
-                    true,
-                    "Counter status updated",
-                    data
+        session.removeAttribute("counterPaused");
+
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                true
             );
 
-            return;
+    } else if ("PAUSED".equals(status)) {
+
+        /*
+         * PAUSED is session-only.
+         * Counter must remain active.
+         */
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                true
+            );
+
+        if (updated) {
+            session.setAttribute(
+                "counterPaused",
+                true
+            );
         }
 
-        writeResponse(
-                response,
-                false,
-                "Invalid staff endpoint",
-                null
+    } else if ("CHECKED_OUT".equals(status)) {
+
+        session.removeAttribute("counterPaused");
+
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                false
+            );
+    }
+
+    if (!updated) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Failed to update counter status\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    java.util.Map<String, Object> details =
+        staffService.getCounterDetails(staffId);
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Counter status updated\","
+        + "\"data\":{"
+        + "\"counterId\":" + details.get("counterId") + ","
+        + "\"counterName\":\"" + details.get("counterName") + "\","
+        + "\"serviceId\":" + details.get("serviceId") + ","
+        + "\"serviceName\":\"" + details.get("serviceName") + "\","
+        + "\"status\":\"" + status + "\""
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
+
+    return;
+}
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Invalid staff endpoint\"," +
+            "\"data\":null}"
         );
     }
 
-    // =========================================================
-    // GET /api/staff/*
-    // =========================================================
+    // =========================
+    // GET /api/staff/profile
+    // =========================
+
     @Override
-    protected void doGet(
-            HttpServletRequest request,
-            HttpServletResponse response)
+    protected void doGet(HttpServletRequest request,
+                         HttpServletResponse response)
             throws ServletException, IOException {
+
+        String path = request.getPathInfo();
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        String path = request.getPathInfo();
-
-        // -----------------------------------------------------
-        // GET /api/staff/profile
-        // -----------------------------------------------------
         if ("/profile".equals(path)) {
 
-            HttpSession session
-                    = request.getSession(false);
+            HttpSession session = request.getSession(false);
 
-            if (session == null
-                    || session.getAttribute("staffId") == null) {
+            if (session == null ||
+                session.getAttribute("staffId") == null) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Staff is not logged in",
-                        null
+                response.getWriter().write(
+                    "{\"success\":false," +
+                    "\"message\":\"Staff is not logged in\"," +
+                    "\"data\":null}"
                 );
 
                 return;
             }
 
-            int staffId
-                    = (Integer) session.getAttribute("staffId");
+            int staffId =
+                (Integer) session.getAttribute("staffId");
 
-            Staff staff
-                    = staffService.getStaffProfile(staffId);
+            Staff staff =
+                staffService.getStaffProfile(staffId);
 
             if (staff == null) {
 
-                writeResponse(
-                        response,
-                        false,
-                        "Staff profile not found",
-                        null
+                response.getWriter().write(
+                    "{\"success\":false," +
+                    "\"message\":\"Staff profile not found\"," +
+                    "\"data\":null}"
                 );
 
                 return;
             }
 
-            String data
-                    = "{"
-                    + "\"staffId\":" + staff.getStaffId() + ","
-                    + "\"staffName\":\"" + escapeJson(staff.getStaffName()) + "\","
-                    + "\"email\":\"" + escapeJson(staff.getEmail()) + "\","
-                    + "\"serviceId\":" + staff.getServiceId() + ","
-                    + "\"counterId\":" + staff.getCounterId()
-                    + "}";
+            String json =
+                "{"
+                + "\"success\":true,"
+                + "\"message\":\"Staff profile retrieved\","
+                + "\"data\":{"
+                + "\"staffId\":" + staff.getStaffId() + ","
+                + "\"staffName\":\"" + staff.getStaffName() + "\","
+                + "\"email\":\"" + staff.getEmail() + "\","
+                + "\"serviceId\":" + staff.getServiceId() + ","
+                + "\"counterId\":" + staff.getCounterId()
+                + "}"
+                + "}";
 
-            writeResponse(
-                    response,
-                    true,
-                    "Staff profile retrieved",
-                    data
-            );
-
-            return;
-        }
-
-        // -----------------------------------------------------
-        // GET /api/staff/queue
-        // -----------------------------------------------------
-        if ("/queue".equals(path)) {
-
-            HttpSession session
-                    = request.getSession(false);
-
-            if (session == null
-                    || session.getAttribute("staffId") == null) {
-
-                writeResponse(
-                        response,
-                        false,
-                        "Staff is not logged in",
-                        null
-                );
-
-                return;
-            }
-
-            int staffId
-                    = (Integer) session.getAttribute("staffId");
-
-            List<Queue> queueList
-                    = staffService.getActiveQueue(staffId);
-
-            StringBuilder data
-                    = new StringBuilder("[");
-
-            for (int i = 0; i < queueList.size(); i++) {
-
-                Queue queue = queueList.get(i);
-
-                if (i > 0) {
-                    data.append(",");
-                }
-
-                data.append("{")
-                        .append("\"queueId\":")
-                        .append(queue.getQueueId())
-                        .append(",")
-                        .append("\"studentId\":")
-                        .append(queue.getStudentId())
-                        .append(",")
-                        .append("\"serviceId\":")
-                        .append(queue.getServiceId())
-                        .append(",")
-                        .append("\"tokenNumber\":")
-                        .append(queue.getTokenNumber())
-                        .append(",")
-                        .append("\"status\":\"")
-                        .append(escapeJson(queue.getStatus()))
-                        .append("\"")
-                        .append("}");
-            }
-
-            data.append("]");
-
-            writeResponse(
-                    response,
-                    true,
-                    "Active queue retrieved",
-                    data.toString()
-            );
+            response.getWriter().write(json);
 
             return;
         }
 
-        writeResponse(
-                response,
-                false,
-                "Invalid staff endpoint",
-                null
-        );
-    }
+        if ("/counter/status".equals(path)) {
 
-    // =========================================================
-    // JSON RESPONSE HELPERS
-    // =========================================================
-    private void writeResponse(
-            HttpServletResponse response,
-            boolean success,
-            String message,
-            String data)
-            throws IOException {
+    HttpSession session = request.getSession(false);
 
-        StringBuilder json
-                = new StringBuilder();
-
-        json.append("{")
-                .append("\"success\":")
-                .append(success)
-                .append(",")
-                .append("\"message\":\"")
-                .append(escapeJson(message))
-                .append("\",")
-                .append("\"data\":");
-
-        if (data == null) {
-            json.append("null");
-        } else {
-            json.append(data);
-        }
-
-        json.append("}");
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
 
         response.getWriter().write(
-                json.toString()
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
         );
+
+        return;
     }
 
-    private String escapeJson(String value) {
+    int staffId =
+        (Integer) session.getAttribute("staffId");
 
-        if (value == null) {
-            return "";
+    java.util.Map<String, Object> details =
+        staffService.getCounterDetails(staffId);
+
+    if (details.isEmpty()) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Counter details not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    String status;
+
+    boolean active =
+        (Boolean) details.get("active");
+
+    boolean paused =
+        Boolean.TRUE.equals(
+            session.getAttribute("counterPaused")
+        );
+
+    if (!active) {
+        status = "CHECKED_OUT";
+    } else if (paused) {
+        status = "PAUSED";
+    } else {
+        status = "AVAILABLE";
+    }
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Counter status retrieved\","
+        + "\"data\":{"
+        + "\"counterId\":" + details.get("counterId") + ","
+        + "\"counterName\":\"" + details.get("counterName") + "\","
+        + "\"serviceId\":" + details.get("serviceId") + ","
+        + "\"serviceName\":\"" + details.get("serviceName") + "\","
+        + "\"status\":\"" + status + "\""
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
+
+    return;
+}
+
+        if ("/dashboard-summary".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    Staff staff =
+        staffService.getStaffProfile(staffId);
+
+    if (staff == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff profile not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    // Get active queue for staff's service
+    List<com.queue.model.Queue> activeQueue =
+        staffService.getActiveQueue(staffId);
+
+    int studentsWaiting = 0;
+
+    for (com.queue.model.Queue queue : activeQueue) {
+
+        if ("WAITING".equals(queue.getStatus())) {
+            studentsWaiting++;
+        }
+    }
+
+    // Get analytics
+    int servedToday =
+        analyticsService.getStudentsServedToday();
+
+    double averageWaitMinutes =
+        analyticsService.getAverageWaitingTime();
+
+    double averageServiceMinutes =
+        analyticsService.getAverageServiceTime();
+
+    int noShows =
+    analyticsService.getNoShowsToday(
+        staff.getServiceId()
+    );
+
+    String peakHour =
+        analyticsService.getPeakHour();
+
+    // Get upcoming bookings for staff's service
+    List<java.util.Map<String, Object>> upcomingBookings =
+    bookingService.getUpcomingBookingsWithDetails(
+        staff.getServiceId()
+    );
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Dashboard summary fetched successfully\","
+        + "\"data\":{"
+        + "\"studentsWaiting\":" + studentsWaiting + ","
+        + "\"servedToday\":" + servedToday + ","
+        + "\"averageWaitMinutes\":" + averageWaitMinutes + ","
+        + "\"averageServiceMinutes\":" + averageServiceMinutes + ","
+        + "\"noShowsToday\":" + noShows + ","
+        + "\"peakHour\":\"" + peakHour + "\","
+        + "\"upcomingBookings\":" + upcomingBookings.size()
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
+
+    return;
+}
+if ("/recent-activity".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    Staff staff =
+        staffService.getStaffProfile(staffId);
+
+    if (staff == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff profile not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    List<com.queue.model.Queue> activityList =
+        staffService.getRecentActivity(staffId);
+
+    StringBuilder json =
+        new StringBuilder();
+
+    json.append("{")
+        .append("\"success\":true,")
+        .append("\"message\":\"Recent activity retrieved\",")
+        .append("\"data\":[");
+
+    boolean firstActivity = true;
+
+    for (com.queue.model.Queue queue : activityList) {
+
+        if (queue.getCalledAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"CALLED\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getCalledAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
         }
 
-        return value
-                .replace("\\", "\\\\")
-                .replace("\"", "\\\"")
-                .replace("\r", "\\r")
-                .replace("\n", "\\n");
+        if (queue.getStartedAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"SERVICE_STARTED\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getStartedAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
+        }
+
+        if (queue.getCompletedAt() != null) {
+
+            if (!firstActivity) {
+                json.append(",");
+            }
+
+            String action =
+                "SKIPPED".equals(queue.getStatus())
+                    ? "SKIPPED"
+                    : "COMPLETED";
+
+            json.append("{")
+                .append("\"tokenNumber\":")
+                .append(queue.getTokenNumber())
+                .append(",")
+                .append("\"action\":\"")
+                .append(action)
+                .append("\",")
+                .append("\"timestamp\":\"")
+                .append(queue.getCompletedAt())
+                .append("\"")
+                .append("}");
+
+            firstActivity = false;
+        }
+    }
+
+    json.append("]}");
+
+    response.getWriter().write(
+        json.toString()
+    );
+
+    return;
+}
+
+
+        if ("/queue".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    java.util.List<com.queue.model.Queue> queueList =
+        staffService.getActiveQueue(staffId);
+
+    StringBuilder json =
+        new StringBuilder();
+
+    json.append("{")
+        .append("\"success\":true,")
+        .append("\"message\":\"Active queue retrieved\",")
+        .append("\"data\":[");
+
+    for (int i = 0; i < queueList.size(); i++) {
+
+        com.queue.model.Queue queue =
+            queueList.get(i);
+
+        if (i > 0) {
+            json.append(",");
+        }
+
+        json.append("{")
+            .append("\"queueId\":")
+            .append(queue.getQueueId())
+            .append(",")
+            .append("\"studentId\":")
+            .append(queue.getStudentId())
+            .append(",")
+            .append("\"serviceId\":")
+            .append(queue.getServiceId())
+            .append(",")
+            .append("\"tokenNumber\":")
+            .append(queue.getTokenNumber())
+            .append(",")
+            .append("\"status\":\"")
+            .append(queue.getStatus())
+            .append("\"")
+            .append("}");
+    }
+
+    json.append("]}");
+
+    response.getWriter().write(json.toString());
+
+    return;
+}
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Invalid staff endpoint\"," +
+            "\"data\":null}"
+        );
     }
 }

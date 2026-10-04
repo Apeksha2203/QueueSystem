@@ -112,50 +112,108 @@ public void init() {
         return;
     }
 
-    String activeParameter =
-        request.getParameter("active");
+    String status =
+        request.getParameter("status");
 
-    if (activeParameter == null) {
+    if (status == null || status.isBlank()) {
 
         response.getWriter().write(
             "{\"success\":false," +
-            "\"message\":\"Active status is required\"," +
+            "\"message\":\"Status is required\"," +
             "\"data\":null}"
         );
 
         return;
     }
 
-    boolean active =
-        Boolean.parseBoolean(activeParameter);
+    status = status.toUpperCase();
+
+    if (!status.equals("AVAILABLE") &&
+        !status.equals("PAUSED") &&
+        !status.equals("CHECKED_OUT")) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Invalid status. Use AVAILABLE, PAUSED or CHECKED_OUT\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
 
     int staffId =
         (Integer) session.getAttribute("staffId");
 
-    boolean updated =
-        staffService.updateCounterStatus(
-            staffId,
-            active
-        );
+    boolean updated = true;
 
-    if (updated) {
+    if ("AVAILABLE".equals(status)) {
 
-        response.getWriter().write(
-            "{\"success\":true," +
-            "\"message\":\"Counter status updated\"," +
-            "\"data\":{\"active\":" +
-            active +
-            "}}"
-        );
+        session.removeAttribute("counterPaused");
 
-    } else {
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                true
+            );
+
+    } else if ("PAUSED".equals(status)) {
+
+        /*
+         * PAUSED is session-only.
+         * Counter must remain active.
+         */
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                true
+            );
+
+        if (updated) {
+            session.setAttribute(
+                "counterPaused",
+                true
+            );
+        }
+
+    } else if ("CHECKED_OUT".equals(status)) {
+
+        session.removeAttribute("counterPaused");
+
+        updated =
+            staffService.updateCounterStatus(
+                staffId,
+                false
+            );
+    }
+
+    if (!updated) {
 
         response.getWriter().write(
             "{\"success\":false," +
             "\"message\":\"Failed to update counter status\"," +
             "\"data\":null}"
         );
+
+        return;
     }
+
+    java.util.Map<String, Object> details =
+        staffService.getCounterDetails(staffId);
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Counter status updated\","
+        + "\"data\":{"
+        + "\"counterId\":" + details.get("counterId") + ","
+        + "\"counterName\":\"" + details.get("counterName") + "\","
+        + "\"serviceId\":" + details.get("serviceId") + ","
+        + "\"serviceName\":\"" + details.get("serviceName") + "\","
+        + "\"status\":\"" + status + "\""
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
 
     return;
 }
@@ -232,6 +290,75 @@ public void init() {
             return;
         }
 
+        if ("/counter/status".equals(path)) {
+
+    HttpSession session = request.getSession(false);
+
+    if (session == null ||
+        session.getAttribute("staffId") == null) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Staff is not logged in\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    int staffId =
+        (Integer) session.getAttribute("staffId");
+
+    java.util.Map<String, Object> details =
+        staffService.getCounterDetails(staffId);
+
+    if (details.isEmpty()) {
+
+        response.getWriter().write(
+            "{\"success\":false," +
+            "\"message\":\"Counter details not found\"," +
+            "\"data\":null}"
+        );
+
+        return;
+    }
+
+    String status;
+
+    boolean active =
+        (Boolean) details.get("active");
+
+    boolean paused =
+        Boolean.TRUE.equals(
+            session.getAttribute("counterPaused")
+        );
+
+    if (!active) {
+        status = "CHECKED_OUT";
+    } else if (paused) {
+        status = "PAUSED";
+    } else {
+        status = "AVAILABLE";
+    }
+
+    String json =
+        "{"
+        + "\"success\":true,"
+        + "\"message\":\"Counter status retrieved\","
+        + "\"data\":{"
+        + "\"counterId\":" + details.get("counterId") + ","
+        + "\"counterName\":\"" + details.get("counterName") + "\","
+        + "\"serviceId\":" + details.get("serviceId") + ","
+        + "\"serviceName\":\"" + details.get("serviceName") + "\","
+        + "\"status\":\"" + status + "\""
+        + "}"
+        + "}";
+
+    response.getWriter().write(json);
+
+    return;
+}
+
         if ("/dashboard-summary".equals(path)) {
 
     HttpSession session = request.getSession(false);
@@ -289,16 +416,18 @@ public void init() {
         analyticsService.getAverageServiceTime();
 
     int noShows =
-        analyticsService.getNoShowCount();
+    analyticsService.getNoShowsToday(
+        staff.getServiceId()
+    );
 
     String peakHour =
         analyticsService.getPeakHour();
 
     // Get upcoming bookings for staff's service
-    List<Booking> upcomingBookings =
-        bookingService.getUpcomingBookings(
-            staff.getServiceId()
-        );
+    List<java.util.Map<String, Object>> upcomingBookings =
+    bookingService.getUpcomingBookingsWithDetails(
+        staff.getServiceId()
+    );
 
     String json =
         "{"

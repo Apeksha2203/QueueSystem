@@ -130,4 +130,63 @@ public class CounterDAO {
 
         return false;
     }
+
+    public java.util.Map<String, Object> getCounterDetails(int counterId) {
+
+    java.util.Map<String, Object> details =
+            new java.util.HashMap<>();
+
+    String sql =
+            "SELECT c.counter_id, c.counter_name, " +
+            "c.service_id, c.is_active, " +
+            "s.service_name " +
+            "FROM counters c " +
+            "JOIN services s ON c.service_id = s.service_id " +
+            "WHERE c.counter_id = ?";
+
+    try (
+        Connection connection = DBConnection.getConnection();
+        PreparedStatement statement =
+                connection.prepareStatement(sql)
+    ) {
+
+        statement.setInt(1, counterId);
+
+        try (ResultSet resultSet = statement.executeQuery()) {
+
+            if (resultSet.next()) {
+
+                details.put(
+                        "counterId",
+                        resultSet.getInt("counter_id")
+                );
+
+                details.put(
+                        "counterName",
+                        resultSet.getString("counter_name")
+                );
+
+                details.put(
+                        "serviceId",
+                        resultSet.getInt("service_id")
+                );
+
+                details.put(
+                        "serviceName",
+                        resultSet.getString("service_name")
+                );
+
+                details.put(
+                        "active",
+                        resultSet.getBoolean("is_active")
+                );
+            }
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+
+    return details;
+}
 }

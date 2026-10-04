@@ -119,6 +119,19 @@ public boolean updateCounterStatus(int staffId, boolean active) {
     );
 }
 
+public java.util.Map<String, Object> getCounterDetails(int staffId) {
+
+    Staff staff = staffDAO.getStaffById(staffId);
+
+    if (staff == null) {
+        return new java.util.HashMap<>();
+    }
+
+    return counterDAO.getCounterDetails(
+        staff.getCounterId()
+    );
+}
+
 public java.util.List<Queue> getRecentActivity(int staffId) {
 
     Staff staff = staffDAO.getStaffById(staffId);

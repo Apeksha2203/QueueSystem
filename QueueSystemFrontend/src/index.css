@@ -221,15 +221,21 @@ h1, h2, h3, h4, h5, h6 {
   .login-left .hero-text h1 {
       font-size: 2.4rem !important;
   }
-  .login-left .float-card.fc-1,
-  .login-left .float-card.fc-2 {
+  .login-left .float-card.fc-1 {
       position: relative !important;
       right: auto !important;
-      left: auto !important;
       top: auto !important;
+      margin: 2rem auto -2.5rem auto !important;
+      transform: rotate(6deg) scale(0.85) !important;
+      z-index: 2;
+  }
+  .login-left .float-card.fc-2 {
+      position: relative !important;
+      left: auto !important;
       bottom: auto !important;
-      margin: 0.5rem auto !important;
-      transform: scale(0.85) !important;
+      margin: 0 auto !important;
+      transform: rotate(-4deg) scale(0.85) !important;
+      z-index: 1;
   }
   .mobile-scroll-btn {
       display: inline-flex !important;

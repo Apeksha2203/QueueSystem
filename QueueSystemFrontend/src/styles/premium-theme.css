@@ -1,0 +1,119 @@
+:root {
+  /* Food Psychology Palette (Warm, Energetic, Appetizing) */
+  /* Dark Mode (Rich Chocolate / Espresso base) */
+  --bg-primary: #1A0C08; /* Slightly darker */
+  --bg-secondary: #2A140E;
+  --bg-tertiary: #3D1E15;
+  
+  --text-primary: #FFF8F0;
+  --text-secondary: #E8D0C5; /* Lighter for better contrast */
+  
+  --accent-red: #FF3B30;
+  --accent-orange: #FF9500;
+  --accent-yellow: #FFCC00;
+  
+  --glass-bg: rgba(61, 30, 21, 0.85); /* Much brighter glass for contrast */
+  --glass-border: rgba(255, 149, 0, 0.3);
+  --glass-shadow: 0 16px 40px 0 rgba(0, 0, 0, 0.6);
+  
+  --font-heading: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --transition-bouncy: all 0.5s cubic-bezier(0.5, 1.5, 0.4, 1);
+  --border-radius-xl: 32px;
+  --border-radius-lg: 20px;
+}
+
+[data-theme="light"] {
+  /* Light Mode (Creamy Vanilla / Bakery base) */
+  --bg-primary: #F5EBE6; /* Slightly darker cream to make white cards pop */
+  --bg-secondary: #FFFFFF;
+  --bg-tertiary: #FFF0E0;
+  
+  --text-primary: #1F0F0A;
+  --text-secondary: #5C433A;
+  
+  --glass-bg: rgba(255, 255, 255, 1); /* Solid white cards in light mode */
+  --glass-border: rgba(255, 59, 48, 0.15);
+  --glass-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; letter-spacing: -0.02em; }
+
+.mesh-bg {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  z-index: -1; background: var(--bg-primary); overflow: hidden;
+}
+
+.mesh-blob {
+  position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6;
+  animation: floatAppetizing 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mesh-blob-1 { width: 600px; height: 600px; background: var(--accent-orange); top: -150px; left: -100px; }
+.mesh-blob-2 { width: 500px; height: 500px; background: var(--accent-red); bottom: -100px; right: -50px; animation-delay: -7s; }
+
+/* Prevent GSAP FOUC (Flash) on load */
+/* Removed visibility: hidden to ensure content always shows up even if JS fails */
+.gsap-float, .gsap-card, .gsap-stagger, .gsap-fade, .gsap-zoom, .gsap-hero h1, .gsap-hero p, .gsap-auth {
+    /* visibility: hidden; */
+}
+
+@keyframes floatAppetizing {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+  100% { transform: translate(80px, 60px) scale(1.15) rotate(10deg); }
+}
+
+.glass-panel {
+  background: var(--glass-bg);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 2px solid var(--glass-border); box-shadow: var(--glass-shadow);
+  border-radius: var(--border-radius-xl); transition: var(--transition-bouncy);
+}
+
+.glass-panel:hover {
+  transform: translateY(-4px); border-color: rgba(255, 149, 0, 0.5);
+  box-shadow: 0 20px 40px -10px rgba(255, 59, 48, 0.3);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+  color: #FFF; border: none; padding: 16px 32px; border-radius: 100px;
+  font-family: var(--font-heading); font-weight: 700; font-size: 1.1rem;
+  cursor: pointer; transition: var(--transition-bouncy); display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+  box-shadow: 0 8px 24px -6px rgba(255, 59, 48, 0.5);
+}
+
+.btn-primary:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 12px 28px -4px rgba(255, 149, 0, 0.6); }
+.btn-primary:active { transform: scale(0.95); }
+
+.form-group { margin-bottom: 1.5rem; }
+.form-label { display: block; margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-secondary); font-weight: 600; }
+
+.form-input {
+  width: 100%; padding: 16px 20px; background: var(--bg-secondary); border: 2px solid transparent;
+  border-radius: var(--border-radius-lg); color: var(--text-primary); font-family: var(--font-body); font-size: 1.05rem; transition: var(--transition-bouncy);
+}
+.form-input:focus { outline: none; background: var(--bg-primary); border-color: var(--accent-orange); box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2); }
+
+.theme-toggle {
+  position: fixed; top: 32px; right: 32px; background: var(--glass-bg); border: 2px solid var(--glass-border);
+  color: var(--text-primary); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: var(--transition-bouncy); z-index: 100; backdrop-filter: blur(10px);
+}
+.theme-toggle:hover { transform: scale(1.15) rotate(15deg); background: var(--accent-yellow); border-color: var(--accent-yellow); color: #2D1810; }
+
+.text-gradient {
+  background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}

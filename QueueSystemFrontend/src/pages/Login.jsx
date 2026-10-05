@@ -66,9 +66,15 @@ const Login = () => {
           <h1 className="text-gradient" style={{ fontSize: '4.5rem', lineHeight: 1.05, marginBottom: '1.5rem', letterSpacing: '-0.04em' }}>
             No more<br />standing in<br />lines.
           </h1>
-          <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '440px', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', maxWidth: '440px', lineHeight: 1.6, marginBottom: '2rem' }}>
             Join queues digitally, track your live position, and arrive exactly when it's your turn.
           </p>
+          <button 
+            className="mobile-scroll-btn"
+            onClick={() => document.getElementById('auth-section').scrollIntoView({ behavior: 'smooth' })}
+          >
+            Get Started
+          </button>
         </div>
         
         <div className="float-card glass-panel fc-1 gsap-float" style={{ position: 'absolute', right: '5%', top: '25%', transform: 'rotate(8deg)', padding: '1.5rem', width: '220px', opacity: 0 }}>
@@ -82,7 +88,7 @@ const Login = () => {
         </div>
       </div>
 
-      <div className="login-right" style={{ flex: 1, padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div id="auth-section" className="login-right" style={{ flex: 1, padding: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div className="auth-card glass-panel gsap-auth" style={{ width: '100%', maxWidth: '440px', padding: '3rem', opacity: 0 }}>
           
           {isLogin ? (

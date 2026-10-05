@@ -156,6 +156,10 @@ h1, h2, h3, h4, h5, h6 {
   display: none;
 }
 
+.mobile-scroll-btn {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .main-content { padding: 1.5rem; padding-bottom: 110px; }
@@ -196,5 +200,62 @@ h1, h2, h3, h4, h5, h6 {
   .bottom-nav-item.active {
       color: var(--accent-orange);
       transform: translateY(-4px) scale(1.1);
+  }
+  
+  /* Login Page Mobile Optimization */
+  .login-wrapper {
+      flex-direction: column !important;
+      height: auto !important;
+      width: 100vw !important;
+      overflow-x: hidden !important;
+  }
+  .login-left {
+      padding: 5rem 1.5rem 3rem !important;
+      min-height: 100vh !important;
+      width: 100% !important;
+      flex: none !important;
+      align-items: center !important;
+      text-align: center !important;
+      justify-content: flex-start !important;
+  }
+  .login-left .hero-text h1 {
+      font-size: 2.4rem !important;
+  }
+  .login-left .float-card.fc-1,
+  .login-left .float-card.fc-2 {
+      position: relative !important;
+      right: auto !important;
+      left: auto !important;
+      top: auto !important;
+      bottom: auto !important;
+      margin: 0.5rem auto !important;
+      transform: scale(0.85) !important;
+  }
+  .mobile-scroll-btn {
+      display: inline-flex !important;
+      background: var(--accent-orange);
+      color: white;
+      border: none;
+      padding: 1rem 2.5rem;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 10px 25px -5px rgba(255, 149, 0, 0.4);
+      margin-bottom: 2rem;
+  }
+  .login-right {
+      padding: 2rem 1rem !important;
+      min-height: 100vh !important;
+      width: 100% !important;
+      flex: none !important;
+      align-items: center !important;
+      justify-content: center !important;
+  }
+  .auth-card {
+      padding: 2rem 1.5rem !important;
+      margin-top: 0 !important;
+      width: 100% !important;
+      max-width: 100% !important;
   }
 }

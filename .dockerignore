@@ -1,0 +1,7 @@
+*
+!Dockerfile
+!pom.xml
+!src/
+!src/**
+src/main/webapp/ui/
+src/main/webapp/.vite/

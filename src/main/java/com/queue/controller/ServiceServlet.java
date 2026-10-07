@@ -39,7 +39,8 @@ public class ServiceServlet extends HttpServlet {
             if (cause instanceof java.sql.SQLException sqlFailure) {
                 diagnostic += " SQLState=" + sqlFailure.getSQLState() + " code=" + sqlFailure.getErrorCode();
             }
-            getServletContext().log("Service catalogue database failure: " + diagnostic);
+            // Container hosts collect stdout/stderr; Tomcat context logs can go to files.
+            System.err.println("Service catalogue database failure: " + diagnostic);
             response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
             response.getWriter().write("{\"success\":false,\"message\":\"Service catalogue unavailable. Check backend database configuration and server logs.\"}");
             return;

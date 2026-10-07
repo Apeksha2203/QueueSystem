@@ -30,8 +30,20 @@ public class ServiceServlet extends HttpServlet {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
-        List<Service> services =
-                serviceService.getAllServices();
+        List<Service> services;
+        try {
+            services = serviceService.getAllServices();
+        } catch (IllegalStateException failure) {
+            Throwable cause = failure.getCause();
+            String diagnostic = cause == null ? "unknown" : cause.getClass().getSimpleName();
+            if (cause instanceof java.sql.SQLException sqlFailure) {
+                diagnostic += " SQLState=" + sqlFailure.getSQLState() + " code=" + sqlFailure.getErrorCode();
+            }
+            getServletContext().log("Service catalogue database failure: " + diagnostic);
+            response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+            response.getWriter().write("{\"success\":false,\"message\":\"Service catalogue unavailable. Check backend database configuration and server logs.\"}");
+            return;
+        }
 
         StringBuilder json =
                 new StringBuilder();

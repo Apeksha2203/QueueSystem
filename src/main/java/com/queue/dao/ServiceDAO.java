@@ -47,7 +47,7 @@ public class ServiceDAO {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Cannot load service catalogue", e);
         }
 
         return services;

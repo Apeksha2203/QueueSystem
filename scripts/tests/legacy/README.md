@@ -1,0 +1,1 @@
+These files record the fixed-slot policy used before daily queue reservations. They are retained for reference and are not runnable current acceptance tests. Run ../reservation-api-test.mjs and ../DailyReservationChecks.java instead.

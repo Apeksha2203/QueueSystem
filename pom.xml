@@ -52,6 +52,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <version>3.4.0</version>
+                <configuration>
+                    <!-- React is served by Vite or a static host; Tomcat serves the team backend and JSP modules. -->
+                    <warSourceExcludes>ui/**,student/*.html</warSourceExcludes>
+                    <packagingExcludes>ui/**,student/*.html</packagingExcludes>
+                </configuration>
             </plugin>
         </plugins>
     </build>

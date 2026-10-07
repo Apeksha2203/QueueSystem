@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "vite build --base=./",
+    "build:tomcat": "npm run build && node scripts/sync-tomcat.mjs",
     "lint": "oxlint",
     "preview": "vite preview"
   },

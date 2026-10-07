@@ -1,4 +1,24 @@
 target/
 .vscode/
 *.class
-src/main/java/com/queue/util/DBConnection.java
+# Local static-preview cache
+/src/main/webapp/.vite/
+
+# Local backend runtime and credentials
+.runtime/
+config/db.local.properties
+/frontend/node_modules/
+/frontend/dist/
+config/test-clock.local.properties
+
+# Secrets: commit templates, never local values
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+QueueSystemFrontend/node_modules/
+QueueSystemFrontend/dist/
+tmp/
+# Generated historical frontend bundles; source is in QueueSystemFrontend/
+/src/main/webapp/ui/

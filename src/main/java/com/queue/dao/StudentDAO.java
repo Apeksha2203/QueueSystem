@@ -1,6 +1,7 @@
 package com.queue.dao;
 
 import com.queue.model.Student;
+import com.queue.util.Passwords;
 import com.queue.util.DBConnection;
 
 import java.sql.Connection;
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 public class StudentDAO {
 
     public boolean registerStudent(Student student) {
+        com.queue.util.StudentValidation.registration(student);
 
         String sql = "INSERT INTO students " +
                      "(student_name, email, phone, password) " +
@@ -23,7 +25,7 @@ public class StudentDAO {
             statement.setString(1, student.getStudentName());
             statement.setString(2, student.getEmail());
             statement.setString(3, student.getPhone());
-            statement.setString(4, student.getPassword());
+            statement.setString(4, Passwords.hash(student.getPassword()));
 
             int rowsInserted = statement.executeUpdate();
 
@@ -39,7 +41,7 @@ public class StudentDAO {
     public Student loginStudent(String email, String password) {
 
         String sql = "SELECT * FROM students " +
-                     "WHERE email = ? AND password = ?";
+                     "WHERE email = ?";
 
         try (
             Connection connection = DBConnection.getConnection();
@@ -47,11 +49,11 @@ public class StudentDAO {
         ) {
 
             statement.setString(1, email);
-            statement.setString(2, password);
+
 
             ResultSet resultSet = statement.executeQuery();
 
-            if (resultSet.next()) {
+            if (resultSet.next() && Passwords.matches(password, resultSet.getString("password"))) {
 
                 Student student = new Student();
 
@@ -61,6 +63,11 @@ public class StudentDAO {
                 student.setPhone(resultSet.getString("phone"));
                 student.setPassword(resultSet.getString("password"));
 
+                if (!student.getPassword().startsWith("pbkdf2$")) {
+                    try (PreparedStatement migrate = connection.prepareStatement("UPDATE students SET password = ? WHERE student_id = ? AND password = ?")) {
+                        migrate.setString(1, Passwords.hash(password)); migrate.setInt(2, student.getStudentId()); migrate.setString(3, student.getPassword()); migrate.executeUpdate();
+                    }
+                }
                 return student;
             }
 

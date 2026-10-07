@@ -86,3 +86,12 @@ Service-card Make booking action is now an inset full-width button-style label (
 - Service cards show measured average processing time per student, using seconds for sub-minute durations.
 - Student data refreshes every eight seconds and immediately when the browser tab becomes visible/focused; requests bypass browser cache.
 - Services with no completed processing samples retain their configured initial estimate. Updated landing closing guidance to reflect carryover.
+
+### Cloud deployment and academic preparation - 8 October 2026
+- Added Docker Java 17/Tomcat 10.1 deployment and two Netlify build configurations with API proxy generation.
+- Disabled Tomcat shutdown listener to avoid hosting probes using the wrong listener.
+- Catalogue failures now return HTTP 503; safe SQLState diagnostics go to the hosting console rather than a misleading successful empty list.
+- Cloud database communication failure resolved by correcting the JDBC public MySQL port; Tomcat HTTP PORT remains 8080.
+- Both websites, API proxies, all three staff logins and student signup/prebooking/cancellation smoke checks verified; see docs/CLOUD-VALIDATION.md.
+- Removed the ignored local testing clock. Original campus hours apply using real Asia/Kolkata time.
+- Added editable study-guide sources, a PDF generation script and master/presentation PDFs under output/pdf/. Credentials and generated cloud staff SQL remain excluded from Git.

@@ -4,6 +4,8 @@ Start with the presentation runbook for the demonstration sequence, then use the
 
 - [Master PDF](../output/pdf/Campus-Queue-Master-Guide.pdf): architecture, modules, queue rules, tokens, measured ETA, SQL exercises, Java/React explanations, viva questions, deployment costs/troubleshooting, limitations, file inventory and numbered source appendix.
 - [Presentation PDF](../output/pdf/Campus-Queue-Presentation-Runbook.pdf): ordered demonstration, suggested talk track, team handoffs, code/database tour, rehearsal questions and failure recovery.
+- [Student frontend preparation PDF](../output/pdf/Campus-Queue-Student-Frontend-Preparation.pdf): personal speaking notes, packages, active and retained files, API flow, React concepts and viva answers.
+- [Editable student frontend notes](student-frontend-preparation.md)
 - [Editable master source](master-guide.md)
 - [Editable presentation source](presentation-runbook.md)
 - [Cloud validation evidence](CLOUD-VALIDATION.md)
@@ -16,6 +18,7 @@ Regenerate with Python and reportlab:
 
 ```
 python scripts/build-preparation-pdfs.py
+python scripts/build-student-preparation-pdf.py
 python scripts/check-preparation-pdfs.py
 ```
 

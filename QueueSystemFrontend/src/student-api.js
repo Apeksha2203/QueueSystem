@@ -102,7 +102,8 @@ export function useStudentBackend() {
       const data = await studentRequest(path, payload);
       if (path === "/login" || path === "/register") setProfile(data);
       else if (path === "/logout") { setProfile(null); setCatalog([]); setTickets([]); setBookings([]); setCatalogLoaded(false); }
-      else await refresh();
+      // A saved action remains successful even if its subsequent display refresh fails; never invite duplicate writes.
+      else await refresh().catch(() => {});
       return data;
     } catch (failure) { setError(failure.message); throw failure; }
     finally { setBusy(false); }

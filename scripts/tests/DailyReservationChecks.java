@@ -48,6 +48,11 @@ class DailyReservationChecks {
             check(n(preview,"position")==1&&"10:00".equals(preview.get("estimate")),"preview before opening has first position and opening estimate");
             List<Integer> tickets=new ArrayList<>();for(int i=0;i<12;i++)tickets.add(n(early.reserve(students.get(i),service),"queueId"));
             check(n(early.preview(students.get(11),service),"position")==12,"reservations retain confirmation order");
+            Map<String,Object> overview=early.studentOverview(students.get(11));
+            @SuppressWarnings("unchecked") List<Map<String,Object>> overviewTickets=(List<Map<String,Object>>)overview.get("tickets");
+            Map<String,Object> overviewTicket=overviewTickets.stream().filter(ticket->n(ticket,"serviceId")==service).findFirst().orElseThrow();
+            check(n(overviewTicket,"queueId")==tickets.get(11)&&n(overviewTicket,"ahead")==11,"batched overview retains student's ticket and FIFO position");
+            check(Objects.equals(early.preview(students.get(11),service).get("estimate"),overviewTicket.get("estimate")),"batched overview retains preopening estimate");
             fails(()->early.reserve(students.get(0),service),"duplicate daily reservation rejected");
             fails(()->call(early,staff),"counter cannot call before opening");
             fails(()->new ReservationService(at(13,30)).operate(staff,"call-next",0),"counter cannot call during lunch");

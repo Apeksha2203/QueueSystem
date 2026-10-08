@@ -1,6 +1,6 @@
 // VIVA GUIDE: Staff dashboard orchestration: polls endpoints, derives assigned current service, runs actions and refreshes UI state.
 import StudentPhone from '../components/StudentPhone'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../services/api'
 import StatCard from '../components/StatCard'
 import QueueTable from '../components/QueueTable'
@@ -29,8 +29,12 @@ export default function StaffDashboard({ staff, onLogout, page = 'dashboard', on
   const [error, setError] = useState('')
   // Time when the latest staff data load finished, shown to the operator.
   const [lastUpdated, setLastUpdated] = useState(null)
+  const loading = useRef(false)
 
   const load = useCallback(async (silent = false) => {
+    // Cloud reads may exceed the poll interval; never stack another four requests on the unfinished load.
+    if (loading.current) return
+    loading.current = true
     try {
       if (!silent) setError('')
       // Load independent endpoints concurrently, then apply their returned data to UI state.
@@ -42,13 +46,14 @@ export default function StaffDashboard({ staff, onLogout, page = 'dashboard', on
       setCounter(counterResult.data)
       setActivity(activityResult.data || [])
       setLastUpdated(new Date())
+      setError('')
     } catch (err) {
       if (err.status === 401) {
         onLogout()
         return
       }
       setError(err.message)
-    }
+    } finally { loading.current = false }
   }, [onLogout])
 
   // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
@@ -56,7 +61,7 @@ export default function StaffDashboard({ staff, onLogout, page = 'dashboard', on
     load()
     // Polling refreshes the server view periodically; the effect cleanup must clear this timer.
     // Refresh summary, queue, availability and activity every seven seconds; cleanup stops polling.
-    const timer = setInterval(() => load(true), 7000)
+    const timer = setInterval(() => { if (!document.hidden) load(true) }, 10000)
     return () => clearInterval(timer)
   }, [load])
 

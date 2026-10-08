@@ -5,6 +5,8 @@ const API_BASE = "/api";
 async function apiRequest(url, options = {}) {
     const response = await fetch(`${API_BASE}${url}`, {
         credentials: "include",
+        cache: "no-store",
+        signal: AbortSignal.timeout(60000),
         ...options,
     });
 

@@ -104,3 +104,12 @@ Verified the live catalogue contains all three services and the before-opening r
 # Midnight prebooking priority - 8 October 2026
 
 New-day prebooking is available from 00:00 Asia/Kolkata. Reservation creation reconciles overdue waiting tickets before assigning new daily order, so carryovers precede new bookings even after backend sleep/restart. Rejected after-closing requests do not trigger that catch-up path. All 65 daily reservation checks passed against local fixtures, including two midnight/carryover regression cases; test fixtures were removed.
+
+## 2026-10-08 — Cloud request latency and refresh reliability
+
+- Student overview reuses one JDBC connection, batches service/counter and student-ticket lookups, and shares that connection with measured-duration ETA reads.
+- Normal rollover checks avoid opening a transaction and taking service locks when no waiting tickets are overdue; the existing locked reconciliation remains in place when required.
+- Student reservation endpoints no longer open an extra health-check connection before their own database work; legacy login/register/join probes remain.
+- Staff polling does not overlap unfinished refreshes, pauses in hidden tabs and clears recovered error banners. Requests have a 60-second timeout.
+- Successful student writes remain successful when a subsequent display refresh fails, preventing misleading booking-failure prompts and duplicate submissions.
+- Validation: Java WAR and both frontend builds passed; 67 daily reservation checks passed, plus catalogue loading and successful-write/failing-refresh regressions. Live overview before the change measured 12–14 seconds; deployment verification is separate.

@@ -57,8 +57,9 @@ public class StudentPortalServlet extends HttpServlet {
                 if (session != null) session.invalidate();
                 ok(res, null); return;
             }
-            // Fail explicitly instead of treating DAO database failures as an empty successful result.
-            try (Connection connection = DBConnection.getConnection()) {
+            // Legacy login/register/join DAOs hide database exceptions; probe only those paths.
+            // Reservation reads/writes propagate SQL errors themselves and do not need an extra cloud connection.
+            if (post && Set.of("/login","/register","/queue/join").contains(path)) try (Connection connection = DBConnection.getConnection()) {
                 if (!connection.isValid(3)) throw new java.sql.SQLException("Database unavailable");
             }
             if (post && ("/login".equals(path) || "/register".equals(path))) {
@@ -86,34 +87,7 @@ public class StudentPortalServlet extends HttpServlet {
             }
             int studentId = (Integer) session.getAttribute("studentId");
             if (!post && "/overview".equals(path)) {
-                List<Map<String,Object>> catalog = new ArrayList<>();
-                List<Map<String,Object>> tickets = new ArrayList<>();
-                for (Service service : services.getAllServices()) {
-                    int id = service.getServiceId();
-                    reservations.closeWaiting(id);
-                    int active = counters.getCountersByService(id).size();
-                    catalog.add(Map.of("serviceId", id, "serviceName", service.getServiceName(),
-                            "description", Objects.toString(service.getDescription(), ""),
-                            "averageServiceTime", new com.queue.service.WaitingTimeService().getAverageServiceTime(service.getServiceId()), "activeCounters", active));
-                    com.queue.model.Queue entry = students.getQueueStatus(studentId, id);
-                    if (entry != null && Set.of("WAITING", "CALLED", "SERVING").contains(entry.getStatus())) {
-                        int ahead = Math.max(0, students.getQueuePosition(studentId, id) - 1);
-                        Map<String,Object> ticket = new LinkedHashMap<>();
-                        ticket.put("queueId", entry.getQueueId()); ticket.put("serviceId", id);
-                        ticket.put("serviceName", service.getServiceName()); ticket.put("place", service.getServiceName());
-                        ticket.put("token", String.format("%03d", entry.getTokenNumber()));
-                        ticket.put("status", entry.getStatus()); ticket.put("ahead", ahead);
-                        Map<String,Object> projection=reservations.preview(studentId,id);
-                        ticket.put("ahead",projection.get("ahead"));ticket.put("date",projection.get("date"));ticket.put("rescheduled",projection.get("rescheduled"));
-                        int minutes = projection.get("wait")==null?-1:((Number)projection.get("wait")).intValue();
-                        ticket.put("wait", minutes < 0 ? null : minutes);
-                        ticket.put("currentToken", students.getCurrentToken(id));
-                        ticket.put("counterId",projection.get("counterId"));ticket.put("counterName",projection.get("counterName"));ticket.put("missedTurns",projection.get("missedTurns"));ticket.put("estimate",projection.get("estimate"));ticket.put("hours",projection.get("hours"));
-                        ticket.put("closingRisk",projection.get("closingRisk"));ticket.put("warning",projection.get("warning"));ticket.put("projectedServiceTime",projection.get("projectedServiceTime"));
-                        tickets.add(ticket);
-                    }
-                }
-                ok(res, Map.of("services", catalog, "tickets", tickets)); return;
+                ok(res, reservations.studentOverview(studentId)); return;
             }
             if (post && "/queue/join".equals(path)) {
                 int serviceId = Integer.parseInt(required(req, "serviceId"));

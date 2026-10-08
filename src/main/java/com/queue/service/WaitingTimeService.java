@@ -71,9 +71,15 @@ public class WaitingTimeService {
      */
     // Averages positive durations from up to twenty recent completed records, using measured seconds or scheduled-window timestamps; falls back to configured minutes when no samples exist.
     public double getAverageServiceTime(int serviceId) {
+        try(Connection c=DBConnection.getConnection()) { return getAverageServiceTime(c,serviceId); }
+        catch(Exception error){throw new IllegalStateException("Service estimate unavailable",error);}
+    }
+
+    // Reuse the caller's connection while reading several services; each cloud connection handshake adds latency.
+    public double getAverageServiceTime(Connection c,int serviceId) {
         // Use at most twenty recent completed samples, not waiting/booking duration, as the processing-time estimate.
         String historicalSql="SELECT started_at,completed_at,processing_seconds FROM queue WHERE service_id=? AND status='COMPLETED' AND started_at IS NOT NULL AND completed_at>started_at ORDER BY completed_at DESC,queue_id DESC LIMIT 20";
-        try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement(historicalSql)) {
+        try(PreparedStatement p=c.prepareStatement(historicalSql)) {
             p.setInt(1,serviceId);try(ResultSet r=p.executeQuery()) {
                 double total=0;int count=0;
                 while(r.next()){double minutes=r.getObject(3)!=null?r.getDouble(3)/60.0:ServiceHours.processingMinutes(r.getTimestamp(1).toLocalDateTime(),r.getTimestamp(2).toLocalDateTime());if(minutes>0){total+=minutes;count++;}}
@@ -84,8 +90,7 @@ public class WaitingTimeService {
         String serviceConfigSql =
                 "SELECT average_service_time FROM services WHERE service_id = ?";
 
-        try (Connection connection = DBConnection.getConnection();
-             PreparedStatement statement = connection.prepareStatement(serviceConfigSql)) {
+        try (PreparedStatement statement = c.prepareStatement(serviceConfigSql)) {
 
             statement.setInt(1, serviceId);
             try (ResultSet resultSet = statement.executeQuery()) {

@@ -189,7 +189,7 @@ function VirtualQueue({ ticket }) {
   );
 }
 // Render service choices and the selected ticket from backend state.
-function Overview({ ticket, profile, join, catalog, busy }) {
+function Overview({ ticket, profile, join, catalog, catalogLoaded, error, refresh, busy }) {
   const location = useLocation();
   // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
@@ -291,7 +291,7 @@ function Overview({ ticket, profile, join, catalog, busy }) {
           </span>
         </div>
         <div className="service-list">
-          {!catalog.length && <p className="muted">No campus services have been configured yet. Your campus team will add them to the database.</p>}
+          {!catalog.length && <div role="status"><p className="muted">{error ? "Services could not be loaded. Please retry; prebooking is available before opening." : !catalogLoaded ? "Loading campus services… The cloud backend may take a moment to wake up." : "No campus services have been configured yet."}</p><button className="button secondary" onClick={() => refresh().catch(() => {})}>Reload services</button></div>}
           {catalog.map((s) => {
             const ServiceIcon =
               {
@@ -706,6 +706,9 @@ function Experience() {
                   ticket={ticket}
                   profile={profile}
                   catalog={backend.catalog}
+                  catalogLoaded={backend.catalogLoaded}
+                  error={backend.error}
+                  refresh={backend.refresh}
                   busy={backend.busy}
                   join={create}
                 />

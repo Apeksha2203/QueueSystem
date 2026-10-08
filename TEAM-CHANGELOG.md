@@ -98,3 +98,6 @@ Service-card Make booking action is now an inset full-width button-style label (
 # Viva comment pass - 8 October 2026
 
 Added file, method/component and key-rule explanations across 116 source/configuration files, including student/staff React, Java controllers/services/DAOs/models, SQL, CSS, retained JSP/browser flows and setup/test scripts. Current and retained student flows are labelled. JSON/generated/asset files are explained in docs/CODE-STUDY-INDEX.md. Source comparisons verify that executable tokens/transforms are unchanged; Java and both React builds pass. Original operating hours and real campus time remain in effect.
+# Student catalogue loading recovery - 8 October 2026
+
+Verified the live catalogue contains all three services and the before-opening reservation preview returns canReserve=true with a 10 AM estimate. Fixed frontend loading: catalogue appears independently of slow overview/history requests, polling shares outstanding refreshes, cloud requests allow a 60-second wake-up window, and the dashboard distinguishes loading/errors from a genuinely empty successful catalogue. No operating-hour or prebooking rules changed. Student production build and the focused student-loading regression check passed.

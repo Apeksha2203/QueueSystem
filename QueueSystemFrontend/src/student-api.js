@@ -1,13 +1,14 @@
 // VIVA GUIDE: Student fetch wrapper and shared backend hook. Includes credentials, error handling, polling and focused-tab refresh.
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Send the student HTTP request with cookies, parse JSON and raise errors; payload presence selects POST versus GET.
-export async function studentRequest(path, payload, signal) {
-  const response = await fetch(`/api/student${path}`, {
+export async function studentRequest(path, payload, signal, base = "/api/student") {
+  const response = await fetch(`${base}${path}`, {
     method: payload ? "POST" : "GET",
     credentials: "include",
     cache: "no-store",
-    signal: signal || AbortSignal.timeout(12000),
+    // The free cloud backend can take longer to wake up; do not mistake a slow response for an empty catalogue.
+    signal: signal || AbortSignal.timeout(60000),
     headers: { Accept: "application/json", "X-Requested-With": "XMLHttpRequest" },
     body: payload ? new URLSearchParams(payload) : undefined,
   });
@@ -38,17 +39,36 @@ export function useStudentBackend() {
   const [error, setError] = useState("");
   // An action is pending; disable related controls to reduce repeated submissions.
   const [busy, setBusy] = useState(false);
+  const [catalogLoaded, setCatalogLoaded] = useState(false);
+  const refreshing = useRef(null);
   const refresh = useCallback(async () => {
-    try {
-      // Load independent endpoints concurrently, then apply their returned data to UI state.
-      const [overview, appointments] = await Promise.all([studentRequest("/overview"), studentRequest("/bookings")]);
-      setCatalog(overview.services); setTickets(overview.tickets); setBookings(appointments); setError("");
-    } catch (failure) {
-      setError(failure.message);
-      // An expired session clears personal data so stale tickets are not displayed as authenticated.
-      if (failure.status === 401) { setProfile(null); setTickets([]); setBookings([]); setCatalog([]); }
-      throw failure;
-    }
+    // Reuse an outstanding refresh rather than overlapping slow database requests every eight seconds.
+    if (refreshing.current) return refreshing.current;
+    const work = (async () => {
+      // Show the inexpensive public catalogue immediately, independently of personal history/queue estimates.
+      const results = await Promise.allSettled([
+        studentRequest("/services", undefined, undefined, "/api").then(services => {
+          setCatalog(services); setCatalogLoaded(true);
+        }),
+        studentRequest("/overview").then(overview => {
+          setCatalog(overview.services); setCatalogLoaded(true); setTickets(overview.tickets);
+        }),
+        studentRequest("/bookings").then(setBookings),
+      ]);
+      const failures = results.filter(result => result.status === "rejected").map(result => result.reason);
+      if (failures.some(failure => failure.status === 401)) {
+        setProfile(null); setTickets([]); setBookings([]); setCatalog([]); setCatalogLoaded(false);
+      }
+      // A successful overview can replace a failed public-catalogue request; personal errors stay explicit.
+      const failure = failures.find(item => item.status === 401)
+        || (results[1].status === "rejected" ? results[1].reason : null)
+        || (results[2].status === "rejected" ? results[2].reason : null);
+      setError(failure?.message || "");
+      if (failure) throw failure;
+    })();
+    refreshing.current = work;
+    try { return await work; }
+    finally { refreshing.current = null; }
   }, []);
   // Restore the cookie-backed session once; abort the request when the effect is cleaned up.
   useEffect(() => {
@@ -81,11 +101,11 @@ export function useStudentBackend() {
     try {
       const data = await studentRequest(path, payload);
       if (path === "/login" || path === "/register") setProfile(data);
-      else if (path === "/logout") { setProfile(null); setCatalog([]); setTickets([]); setBookings([]); }
+      else if (path === "/logout") { setProfile(null); setCatalog([]); setTickets([]); setBookings([]); setCatalogLoaded(false); }
       else await refresh();
       return data;
     } catch (failure) { setError(failure.message); throw failure; }
     finally { setBusy(false); }
   }
-  return { profile, ready, catalog, tickets, bookings, error, busy, refresh, action };
+  return { profile, ready, catalog, catalogLoaded, tickets, bookings, error, busy, refresh, action };
 }

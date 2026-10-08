@@ -1,3 +1,4 @@
+# VIVA GUIDE: Builds the WAR, configures an isolated local Tomcat runtime on HTTP port 8081 and starts it with ignored database configuration.
 param([string]$JavaHome, [string]$MavenCommand, [string]$TomcatHome)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent
@@ -10,6 +11,7 @@ $env:CATALINA_HOME = $TomcatHome
 $env:CATALINA_BASE = Join-Path $projectRoot '.runtime/tomcat'
 $env:QUEUE_DB_CONFIG = Join-Path $projectRoot 'config/db.local.properties'
 if (!(Test-Path -LiteralPath $env:QUEUE_DB_CONFIG)) { throw 'Run scripts/configure-db.ps1 first.' }
+# Compile/package the Java application before copying its WAR to isolated Tomcat.
 & $MavenCommand --no-transfer-progress -f (Join-Path $projectRoot 'pom.xml') package
 if ($LASTEXITCODE -ne 0) { throw 'Backend build failed.' }
 foreach ($directory in 'conf', 'logs', 'temp', 'webapps', 'work') {

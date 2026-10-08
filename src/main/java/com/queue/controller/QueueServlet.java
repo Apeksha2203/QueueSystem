@@ -1,3 +1,4 @@
+// VIVA GUIDE: Queue action HTTP adapter. Authenticates staff and delegates actions into ReservationService; retained routes require care.
 package com.queue.controller;
 
 import com.queue.model.Queue;
@@ -20,6 +21,7 @@ public class QueueServlet extends HttpServlet {
     private StudentService studentService;
 
     @Override
+    // Initialize servlet dependencies once when Tomcat creates the servlet.
     public void init() {
     staffService = new StaffService();
     studentService = new StudentService();
@@ -30,12 +32,14 @@ public class QueueServlet extends HttpServlet {
     // =========================
 
     @Override
+    // Handle HTTP POST requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
             throws ServletException, IOException {
 
         String path = request.getPathInfo();
 
+        // The public skip endpoint is retired (410); confirmed missed calls use the current no-show rule.
         if ("/skip".equals(path)) {response.setStatus(410);response.setContentType("application/json");response.getWriter().write("{\"success\":false,\"message\":\"Skip is retired. Use confirmed missed call for absent students.\"}");return;}
         if (java.util.Set.of("/call-next","/call","/start","/complete","/skip","/no-show").contains(java.util.Objects.toString(path,""))) {
             response.setContentType("application/json");response.setCharacterEncoding("UTF-8");
@@ -389,6 +393,7 @@ int staffId = (Integer) session.getAttribute("staffId");
     // =========================
 
 @Override
+// Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
 protected void doGet(HttpServletRequest request,
                      HttpServletResponse response)
         throws ServletException, IOException {
@@ -588,6 +593,7 @@ protected void doGet(HttpServletRequest request,
     // GET QUEUE ID
     // =========================
 
+    // Retrieve queue id for the caller; follow the SQL/service delegation to identify scope and return shape.
     private int getQueueId(HttpServletRequest request) {
 
         String queueIdParameter =
@@ -613,6 +619,7 @@ protected void doGet(HttpServletRequest request,
     // SUCCESS RESPONSE
     // =========================
 
+    // Operation writeSuccess: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void writeSuccess(
             HttpServletResponse response,
             String message)
@@ -631,6 +638,7 @@ protected void doGet(HttpServletRequest request,
     // ERROR RESPONSE
     // =========================
 
+    // Operation writeError: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void writeError(
             HttpServletResponse response,
             String message)

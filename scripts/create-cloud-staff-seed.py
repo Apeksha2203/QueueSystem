@@ -1,3 +1,4 @@
+# VIVA GUIDE: Local staff provisioning generator using standard-library PBKDF2. Generated SQL stays in ignored .runtime; plaintext input is not committed.
 """Create an ignored SQL seed; passwords are prompted locally and hashed."""
 import base64
 import getpass
@@ -15,6 +16,7 @@ for index, (service, name, email) in enumerate(accounts, 1):
     password = os.environ.get(f'CQ_SEED_PASSWORD_{index}') or getpass.getpass(f'Password for {email}: ')
     if len(password) < 6 or not any(c.isalpha() for c in password) or not any(c.isdigit() for c in password):
         raise ValueError('Passwords require at least six characters, a letter and a number.')
+    # Use a different random salt per account; the SQL receives hashes, not plaintext passwords.
     salt = os.urandom(16)
     digest = hashlib.pbkdf2_hmac('sha256', password.encode(), salt, 210000, 32)
     hashed = 'pbkdf2$210000$' + base64.b64encode(salt).decode() + '$' + base64.b64encode(digest).decode()

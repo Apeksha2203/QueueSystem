@@ -1,3 +1,4 @@
+// VIVA GUIDE: Public catalogue adapter. Returns configured services; catches DAO failure as HTTP 503 and writes safe diagnostics to stderr.
 package com.queue.controller;
 
 import com.queue.model.Service;
@@ -18,11 +19,13 @@ public class ServiceServlet extends HttpServlet {
     private ServiceService serviceService;
 
     @Override
+    // Initialize servlet dependencies once when Tomcat creates the servlet.
     public void init() {
         serviceService = new ServiceService();
     }
 
     @Override
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
             throws ServletException, IOException {

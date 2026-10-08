@@ -95,3 +95,6 @@ Service-card Make booking action is now an inset full-width button-style label (
 - Both websites, API proxies, all three staff logins and student signup/prebooking/cancellation smoke checks verified; see docs/CLOUD-VALIDATION.md.
 - Removed the ignored local testing clock. Original campus hours apply using real Asia/Kolkata time.
 - Added editable study-guide sources, a PDF generation script and master/presentation PDFs under output/pdf/. Credentials and generated cloud staff SQL remain excluded from Git.
+# Viva comment pass - 8 October 2026
+
+Added file, method/component and key-rule explanations across 116 source/configuration files, including student/staff React, Java controllers/services/DAOs/models, SQL, CSS, retained JSP/browser flows and setup/test scripts. Current and retained student flows are labelled. JSON/generated/asset files are explained in docs/CODE-STUDY-INDEX.md. Source comparisons verify that executable tokens/transforms are unchanged; Java and both React builds pass. Original operating hours and real campus time remain in effect.

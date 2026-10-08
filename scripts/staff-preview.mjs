@@ -1,7 +1,9 @@
+// VIVA GUIDE: Local staff preview utility; inspect its configuration and caller before treating it as the cloud deployment entry point.
 import http from 'node:http';
 
 // Serve the teammate's JSP UI through Tomcat, with its assets and API on one origin.
 const port = Number(process.env.STAFF_PORT || 5175);
+// Validate the configured HTTPS backend origin before generating API rewrites; credentials/path must not be embedded.
 const backend = new URL(process.env.QUEUE_BACKEND_URL || 'http://127.0.0.1:8081');
 if (backend.protocol !== 'http:') throw new Error('Local backend must use HTTP.');
 

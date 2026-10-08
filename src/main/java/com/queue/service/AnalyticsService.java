@@ -1,3 +1,4 @@
+// VIVA GUIDE: SQL aggregation for dashboard reporting. Some elapsed-time metrics are different from ETA scheduled-window processing samples.
 package com.queue.service;
 
 import com.queue.util.DBConnection;
@@ -17,6 +18,7 @@ public class AnalyticsService {
      * Retrieves the total count of students successfully served today.
      * Uses SQL aggregation: COUNT(*) on completed queue records for CURRENT_DATE.
      */
+    // Retrieve students served today for the caller; follow the SQL/service delegation to identify scope and return shape.
     public int getStudentsServedToday() {
         String sql =
                 "SELECT COUNT(*) AS count FROM queue " +
@@ -40,6 +42,7 @@ public class AnalyticsService {
      * Retrieves the average service time in minutes across all completed queue tickets.
      * Uses SQL aggregation: AVG(TIMESTAMPDIFF(MINUTE, started_at, completed_at)).
      */
+    // Retrieve average service time for the caller; follow the SQL/service delegation to identify scope and return shape.
     public double getAverageServiceTime() {
         String sql =
                 "SELECT AVG(TIMESTAMPDIFF(MINUTE, started_at, completed_at)) AS avg_service " +
@@ -65,6 +68,7 @@ public class AnalyticsService {
      * Retrieves the average waiting time in minutes for students in the queue.
      * Uses SQL aggregation: AVG(TIMESTAMPDIFF(MINUTE, joined_at, COALESCE(started_at, called_at))).
      */
+    // Retrieve average waiting time for the caller; follow the SQL/service delegation to identify scope and return shape.
     public double getAverageWaitingTime() {
         String sql =
                 "SELECT AVG(TIMESTAMPDIFF(MINUTE, joined_at, COALESCE(started_at, called_at, completed_at))) AS avg_wait " +
@@ -92,6 +96,7 @@ public class AnalyticsService {
      *
      * @return Formatted string representation of peak hour (e.g. "10:00 - 11:00") or "N/A"
      */
+    // Retrieve peak hour for the caller; follow the SQL/service delegation to identify scope and return shape.
     public String getPeakHour() {
         String sql =
                 "SELECT HOUR(joined_at) AS hr, COUNT(*) AS queue_count " +
@@ -123,6 +128,7 @@ public class AnalyticsService {
     /**
  * Calculates the count of no-shows and skipped tickets strictly for TODAY.
  */
+// Retrieve no shows today for the caller; follow the SQL/service delegation to identify scope and return shape.
 public int getNoShowsToday() {
     String sql =
             "SELECT " +
@@ -146,6 +152,7 @@ public int getNoShowsToday() {
 /**
  * Calculates the count of no-shows and skipped tickets for a specific service for TODAY.
  */
+// Retrieve no shows today for the caller; follow the SQL/service delegation to identify scope and return shape.
 public int getNoShowsToday(int serviceId) {
     String sql =
             "SELECT " +
@@ -169,6 +176,7 @@ public int getNoShowsToday(int serviceId) {
 
     return 0;
 }
+    // Retrieve no show count for the caller; follow the SQL/service delegation to identify scope and return shape.
     public int getNoShowCount() {
         String sql =
                 "SELECT " +
@@ -201,6 +209,7 @@ public int getNoShowsToday(int serviceId) {
         return data;
     }
     /** Today's assigned-service metrics; only completed visits contribute durations. */
+    // Retrieve service day summary for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Map<String,Object> getServiceDaySummary(int serviceId) throws java.sql.SQLException {
         java.time.LocalDate day=ServiceHours.now().toLocalDate();
         Map<String,Object> data=new HashMap<>();

@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained fixed-slot regression checks; not the current same-day reservation suite. Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 import { execFileSync } from 'node:child_process';
 import { randomBytes } from 'node:crypto';
 import assert from 'node:assert/strict';
@@ -16,6 +17,7 @@ const env={...process.env,QUEUE_DB_CONFIG:`${repo}/config/db.local.properties`,T
 const fixture=(...args)=>execFileSync(java,['-cp',cp,`${testDirectory}/IntegrationFixtures.java`,...args],{env,encoding:'utf8'}).trim();
 const serviceId=Number(fixture('create',`Integration ${run}`,staffEmail));
 const base=process.env.QUEUE_FRONTEND_URL || 'http://127.0.0.1:5173';
+// Named helper client: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function client() {
   let cookie='';
   return async (route,payload) => {
@@ -26,6 +28,7 @@ function client() {
 }
 const a=client(),b=client(),staff=client(),anonymous=client();
 let checks=0;
+// Named helper check: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function check(condition,label){assert.ok(condition,label);checks++;console.log(`PASS ${label}`);}
 try {
   check((await anonymous('/api/student/overview')).status===401,'anonymous personal data rejected');

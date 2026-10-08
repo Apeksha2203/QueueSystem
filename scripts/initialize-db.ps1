@@ -1,3 +1,4 @@
+# VIVA GUIDE: Local database provisioning launcher: uses the Java database setup runner and project SQL scripts.
 param([string]$JavaHome, [string]$MavenCommand)
 $ErrorActionPreference = 'Stop'
 $projectRoot = Split-Path $PSScriptRoot -Parent

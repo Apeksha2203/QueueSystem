@@ -1,3 +1,4 @@
+// VIVA GUIDE: Staff SQL login/profile queries and password verification. Assigned service and counter originate from stored account data.
 package com.queue.dao;
 
 import com.queue.model.Staff;
@@ -9,6 +10,7 @@ import java.sql.ResultSet;
 
 public class StaffDAO {
 
+    // Finds the staff account by email and verifies its password; service/counter assignment comes from stored account fields.
     public Staff loginStaff(String email, String password) {
 
         String sql = "SELECT * FROM staff " +
@@ -74,6 +76,7 @@ public class StaffDAO {
     }
 
 
+    // Retrieve staff by id for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Staff getStaffById(int staffId) {
 
         String sql = "SELECT * FROM staff WHERE staff_id = ?";

@@ -1,3 +1,4 @@
+# VIVA GUIDE: PDF QA: extracts page text, checks known credential values and renders page contact sheets for visual inspection.
 """Check extracted text and render contact sheets for manual visual QA."""
 from pathlib import Path
 import json

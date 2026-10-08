@@ -1,3 +1,4 @@
+// VIVA GUIDE: Catalogue SELECT and model mapping. Now throws on failure so the servlet does not fabricate an empty successful result.
 package com.queue.dao;
 
 import com.queue.model.Service;
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class ServiceDAO {
 
+    // Reads catalogue rows and maps them to Service objects; failure propagates so the servlet can report HTTP 503 instead of fake empty success.
     public List<Service> getAllServices() {
 
         List<Service> services = new ArrayList<>();

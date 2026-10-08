@@ -1,3 +1,4 @@
+// VIVA GUIDE: Supporting source or configuration. Check the entry point or caller, inputs, outputs and failure handling when explaining this file.
 package com.queue.controller;
 
 import java.io.IOException;
@@ -11,6 +12,7 @@ import jakarta.servlet.http.HttpServletResponse;
 public class TestServlet extends HttpServlet {
 
     @Override
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 

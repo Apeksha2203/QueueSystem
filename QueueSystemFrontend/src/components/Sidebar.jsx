@@ -1,11 +1,14 @@
+// VIVA GUIDE: Retained earlier student implementation, outside the current main.jsx -> App.jsx import path. Reusable UI presentation component; check its imports/callers to establish whether the current App uses it.
 import React from 'react';
 import { LayoutGrid, Clock, CalendarDays, Settings } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
 
+// Retained student navigation component; current App.jsx defines its active sidebar inline.
 const Sidebar = ({ isDarkMode, toggleTheme }) => {
   const location = useLocation();
   const path = location.pathname;
 
+  // Arrow-function helper getNavClass: keeps this operation reusable at its call sites.
   const getNavClass = (match) => {
     return `nav-item ${path === match ? 'active' : ''}`;
   };

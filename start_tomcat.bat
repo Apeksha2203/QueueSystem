@@ -1,3 +1,4 @@
+REM VIVA GUIDE: Windows Tomcat launch helper. Environment/tool paths must exist on the presenting computer.
 @echo off
 echo ==========================================
 echo Starting Temporary Local Tomcat Server...

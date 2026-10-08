@@ -1,3 +1,4 @@
+// VIVA GUIDE: Counter lookup and state/storage operations. A counter belongs to one service.
 package com.queue.dao;
 
 import com.queue.model.Counter;
@@ -11,6 +12,7 @@ import java.util.List;
 
 public class CounterDAO {
 
+    // Retrieve counters by service for the caller; follow the SQL/service delegation to identify scope and return shape.
     public List<Counter> getCountersByService(int serviceId) {
 
         List<Counter> counters = new ArrayList<>();
@@ -61,6 +63,7 @@ public class CounterDAO {
     }
 
 
+    // Retrieve counter by id for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Counter getCounterById(int counterId) {
 
         String sql = "SELECT * FROM counters " +
@@ -107,6 +110,7 @@ public class CounterDAO {
     }
 
 
+    // Perform update counter status; inspect its conditions, affected rows and return value before describing success.
     public boolean updateCounterStatus(int counterId,
                                        boolean active) {
 

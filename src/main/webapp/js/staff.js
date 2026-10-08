@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained staff JSP browser behavior. The deployed primary staff interface uses frontend/ React components.
 "use strict";
 
 
@@ -162,6 +163,7 @@ const activityList =
    GENERAL HELPERS
    ========================================================= */
 
+// Named helper showQueueMessage: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function showQueueMessage(message, type = "") {
 
     queueMessage.textContent = message;
@@ -175,6 +177,7 @@ function showQueueMessage(message, type = "") {
 }
 
 
+// Named helper escapeHtml: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function escapeHtml(value) {
 
     return String(value ?? "")
@@ -186,6 +189,7 @@ function escapeHtml(value) {
 }
 
 
+// Named helper formatToken: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function formatToken(tokenNumber) {
 
     if (
@@ -200,6 +204,7 @@ function formatToken(tokenNumber) {
 }
 
 
+// Named helper formatMinutes: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function formatMinutes(value) {
 
     if (
@@ -221,6 +226,7 @@ function formatMinutes(value) {
 }
 
 
+// Named helper getServiceNameFromProfile: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function getServiceNameFromProfile() {
 
     if (!staffProfile) {
@@ -231,6 +237,7 @@ function getServiceNameFromProfile() {
 }
 
 
+// Named helper readJsonResponse: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function readJsonResponse(response) {
 
     const text =
@@ -276,6 +283,7 @@ async function readJsonResponse(response) {
 }
 
 
+// Send a cookie-backed staff request and reject failed/non-JSON responses before screens consume the payload.
 async function apiRequest(
     url,
     options = {}
@@ -299,6 +307,7 @@ async function apiRequest(
 }
 
 
+// Named helper postForm: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function postForm(
     url,
     values = {}
@@ -344,6 +353,7 @@ async function postForm(
    DATE / TIME
    ========================================================= */
 
+// Named helper updateDateTime: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function updateDateTime() {
 
     const now =
@@ -414,6 +424,7 @@ setInterval(
    STAFF PROFILE
    ========================================================= */
 
+// Named helper loadProfile: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function loadProfile() {
 
     const result =
@@ -485,6 +496,7 @@ async function loadProfile() {
    ACTIVE QUEUE
    ========================================================= */
 
+// Named helper loadQueue: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function loadQueue() {
 
     const result =
@@ -515,6 +527,7 @@ async function loadQueue() {
 }
 
 
+// Named helper renderQueue: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function renderQueue() {
 
     if (!queueBody) {
@@ -628,6 +641,7 @@ function renderQueue() {
    QUEUE SUMMARY
    ========================================================= */
 
+// Named helper updateQueueSummary: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function updateQueueSummary() {
 
     const waitingStudents =
@@ -692,6 +706,7 @@ function updateQueueSummary() {
    CURRENT SERVICE
    ========================================================= */
 
+// Named helper restoreCurrentServiceFromQueue: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function restoreCurrentServiceFromQueue() {
 
     const active =
@@ -725,6 +740,7 @@ function restoreCurrentServiceFromQueue() {
 }
 
 
+// Named helper updateCurrentService: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function updateCurrentService() {
 
     if (!currentQueueItem) {
@@ -806,6 +822,7 @@ function updateCurrentService() {
 }
 
 
+// Named helper clearCurrentService: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function clearCurrentService() {
 
     currentQueueItem =
@@ -863,6 +880,7 @@ function clearCurrentService() {
    CALL NEXT
    ========================================================= */
 
+// Named helper callNextStudent: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function callNextStudent() {
 
     if (
@@ -976,6 +994,7 @@ async function callNextStudent() {
    INDIVIDUAL CALL BUTTON
    ========================================================= */
 
+// Named helper handleRowCall: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function handleRowCall(queueId) {
 
     /*
@@ -1009,6 +1028,7 @@ async function handleRowCall(queueId) {
    START SERVICE
    ========================================================= */
 
+// Named helper startService: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function startService() {
 
     if (!currentQueueItem) {
@@ -1072,6 +1092,7 @@ async function startService() {
    COMPLETE SERVICE
    ========================================================= */
 
+// Named helper completeService: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function completeService() {
 
     if (!currentQueueItem) {
@@ -1148,6 +1169,7 @@ async function completeService() {
    SKIP
    ========================================================= */
 
+// Named helper skipService: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function skipService() {
 
     if (!currentQueueItem) {
@@ -1235,6 +1257,7 @@ async function skipService() {
    COUNTER STATUS
    ========================================================= */
 
+// Named helper updateCounterStatus: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function updateCounterStatus(
     active
 ) {
@@ -1296,6 +1319,7 @@ async function updateCounterStatus(
 }
 
 
+// Named helper updateAvailabilityUI: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function updateAvailabilityUI() {
 
     if (!availabilityState) {
@@ -1341,6 +1365,7 @@ function updateAvailabilityUI() {
 }
 
 
+// Named helper pauseCounter: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function pauseCounter() {
 
     if (currentQueueItem) {
@@ -1358,6 +1383,7 @@ async function pauseCounter() {
 }
 
 
+// Named helper resumeCounter: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function resumeCounter() {
 
     if (
@@ -1371,6 +1397,7 @@ async function resumeCounter() {
 }
 
 
+// Named helper checkoutCounter: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function checkoutCounter() {
 
     if (currentQueueItem) {
@@ -1433,6 +1460,7 @@ async function checkoutCounter() {
    ANALYTICS
    ========================================================= */
 
+// Named helper loadAnalytics: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function loadAnalytics() {
 
     try {
@@ -1546,6 +1574,7 @@ async function loadAnalytics() {
    UPCOMING BOOKINGS
    ========================================================= */
 
+// Named helper keepBookingsUnavailable: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function keepBookingsUnavailable() {
 
     /*
@@ -1569,6 +1598,7 @@ function keepBookingsUnavailable() {
    RECENT ACTIVITY
    ========================================================= */
 
+// Named helper addActivity: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function addActivity(
     title,
     description
@@ -1721,6 +1751,7 @@ if (queueBody) {
    INITIALIZATION
    ========================================================= */
 
+// Named helper initializeDashboard: read its arguments and return value; callers determine whether it renders UI or performs an action.
 async function initializeDashboard() {
 
     if (dashboardInitialized) {

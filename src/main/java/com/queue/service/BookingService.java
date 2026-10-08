@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained legacy fixed-slot booking logic. Do not present it as the current same-day reservation algorithm.
 package com.queue.service;
 
 import com.queue.model.Booking;
@@ -36,6 +37,7 @@ public class BookingService {
      * @param bookingTime Time of the booking
      * @return true if available, false otherwise
      */
+    // Operation checkSlotAvailability: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public boolean checkSlotAvailability(int serviceId, Date bookingDate, Time bookingTime) {
         // Rule: Prevent booking past time slots
         if (isPastSlot(bookingDate, bookingTime)) {
@@ -71,6 +73,7 @@ public class BookingService {
     /**
      * Gets all available time slots for a service on a given date.
      */
+    // Retrieve available slots for the caller; follow the SQL/service delegation to identify scope and return shape.
     public List<String> getAvailableSlots(int serviceId, Date bookingDate) {
         List<String> available = new ArrayList<>();
         List<String> bookedSlots = new ArrayList<>();
@@ -113,6 +116,7 @@ public class BookingService {
      * @param booking Booking object containing studentId, serviceId, bookingDate, bookingTime
      * @return Result message indicating success or failure reason
      */
+    // Perform create booking; inspect its conditions, affected rows and return value before describing success.
     public String createBooking(Booking booking) {
         if (booking == null || booking.getStudentId() <= 0 || booking.getServiceId() <= 0) return "Invalid booking request.";
         Date date=booking.getBookingDate(); Time time=booking.getBookingTime();
@@ -151,6 +155,7 @@ public class BookingService {
      * @param studentId ID of the student owning the booking (0 to skip student check)
      * @return true if successfully cancelled, false otherwise
      */
+    // Perform cancel booking; inspect its conditions, affected rows and return value before describing success.
     public boolean cancelBooking(int bookingId, int studentId) {
         String updateSql;
         if (studentId > 0) {
@@ -178,6 +183,7 @@ public class BookingService {
     /**
      * Cancels an existing booking by booking ID.
      */
+    // Perform cancel booking; inspect its conditions, affected rows and return value before describing success.
     public boolean cancelBooking(int bookingId) {
         return cancelBooking(bookingId, 0);
     }
@@ -188,6 +194,7 @@ public class BookingService {
      * @param studentId ID of the student
      * @return List of Booking objects
      */
+    // Retrieve student bookings for the caller; follow the SQL/service delegation to identify scope and return shape.
     public List<Booking> getStudentBookings(int studentId) {
         List<Booking> bookings = new ArrayList<>();
         String sql = "SELECT * FROM bookings WHERE student_id = ? ORDER BY booking_date DESC, booking_time DESC";
@@ -222,6 +229,7 @@ public class BookingService {
      * @param serviceId ID of the service
      * @return List of upcoming Booking objects ordered by date and time
      */
+    // Retrieve upcoming bookings for the caller; follow the SQL/service delegation to identify scope and return shape.
     public List<Booking> getUpcomingBookings(int serviceId) {
         List<Booking> bookings = new ArrayList<>();
         String sql =
@@ -262,6 +270,7 @@ public class BookingService {
      * @param bookingDate Specific date to filter
      * @return List of Booking objects
      */
+    // Retrieve upcoming bookings for the caller; follow the SQL/service delegation to identify scope and return shape.
     public List<Booking> getUpcomingBookings(int serviceId, Date bookingDate) {
         List<Booking> bookings = new ArrayList<>();
         String sql =
@@ -350,6 +359,7 @@ public List<java.util.Map<String, Object>> getUpcomingBookingsWithDetails(int se
     /**
      * Retrieves a single booking by booking ID.
      */
+    // Retrieve booking by id for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Booking getBookingById(int bookingId) {
         String sql = "SELECT * FROM bookings WHERE booking_id = ?";
 
@@ -380,6 +390,7 @@ public List<java.util.Map<String, Object>> getUpcomingBookingsWithDetails(int se
     /**
      * Checks if a student already has an active booking at the same date and time.
      */
+    // Operation hasDuplicateBooking: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public boolean hasDuplicateBooking(int studentId, Date bookingDate, Time bookingTime) {
         String checkSql =
                 "SELECT COUNT(*) AS cnt FROM bookings " +
@@ -407,6 +418,7 @@ public List<java.util.Map<String, Object>> getUpcomingBookingsWithDetails(int se
     /**
      * Checks if a date and time slot is in the past.
      */
+    // Operation isPastSlot: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private boolean isPastSlot(Date bookingDate, Time bookingTime) {
         if (bookingDate == null || bookingTime == null) {
             return true;

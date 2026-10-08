@@ -1,3 +1,4 @@
+// VIVA GUIDE: Local deployment helper: copies built assets to the Java webapp and generates student HTML entry pages. These entry pages are outputs, not the editable React source.
 import {
   cpSync,
   existsSync,

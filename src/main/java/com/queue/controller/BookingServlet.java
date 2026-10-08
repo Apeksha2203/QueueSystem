@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained appointment HTTP surface. Current booking confirmation uses StudentPortalServlet and ReservationService.
 package com.queue.controller;
 
 import com.queue.model.Booking;
@@ -32,6 +33,7 @@ public class BookingServlet extends HttpServlet {
     private final NoShowService noShowService = new NoShowService();
 
     @Override
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -54,6 +56,7 @@ public class BookingServlet extends HttpServlet {
     }
 
     @Override
+    // Handle HTTP POST requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -71,6 +74,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation handleAvailableSlots: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void handleAvailableSlots(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
@@ -103,6 +107,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation handleCreateBooking: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void handleCreateBooking(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -156,6 +161,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation handleCancelBooking: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void handleCancelBooking(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -201,6 +207,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation handleUpcomingBookings: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void handleUpcomingBookings(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
@@ -235,6 +242,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation handleBookingStatus: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void handleBookingStatus(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
@@ -285,6 +293,7 @@ public class BookingServlet extends HttpServlet {
         }
     }
 
+    // Operation isAjaxRequest: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private boolean isAjaxRequest(HttpServletRequest request) {
         String requestedWith = request.getHeader("X-Requested-With");
         String acceptHeader = request.getHeader("Accept");
@@ -294,6 +303,7 @@ public class BookingServlet extends HttpServlet {
                 || "json".equalsIgnoreCase(format);
     }
 
+    // Operation formatBookingJson: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private String formatBookingJson(Booking b) {
         return "{" +
                 "\"bookingId\":" + b.getBookingId() + "," +
@@ -305,6 +315,7 @@ public class BookingServlet extends HttpServlet {
                 "}";
     }
 
+    // Operation escapeJson: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private String escapeJson(String str) {
         if (str == null) return "";
         return str.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "\\r");

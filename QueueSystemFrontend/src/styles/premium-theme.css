@@ -1,3 +1,5 @@
+/* VIVA GUIDE: Retained earlier student theme, imported by the older Layout component. Current App.jsx uses original-identity.css instead. */
+/* Define shared theme variables used by later component rules. */
 :root {
   /* Food Psychology Palette (Warm, Energetic, Appetizing) */
   /* Dark Mode (Rich Chocolate / Espresso base) */
@@ -23,6 +25,7 @@
   --border-radius-lg: 20px;
 }
 
+/* Style [data-theme="light"]; presentation rules do not change queue data or permissions. */
 [data-theme="light"] {
   /* Light Mode (Creamy Vanilla / Bakery base) */
   --bg-primary: #F5EBE6; /* Slightly darker cream to make white cards pop */
@@ -39,6 +42,7 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+/* Style body; presentation rules do not change queue data or permissions. */
 body {
   font-family: var(--font-body);
   background-color: var(--bg-primary);
@@ -50,11 +54,13 @@ body {
 
 h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; letter-spacing: -0.02em; }
 
+/* Style .mesh-bg; presentation rules do not change queue data or permissions. */
 .mesh-bg {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
   z-index: -1; background: var(--bg-primary); overflow: hidden;
 }
 
+/* Style .mesh-blob; presentation rules do not change queue data or permissions. */
 .mesh-blob {
   position: absolute; border-radius: 50%; filter: blur(120px); opacity: 0.6;
   animation: floatAppetizing 15s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
@@ -65,15 +71,18 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; let
 
 /* Prevent GSAP FOUC (Flash) on load */
 /* Removed visibility: hidden to ensure content always shows up even if JS fails */
+/* Style .gsap-float, .gsap-card, .gsap-stagger, .gsap-fade, .gsap-zoom, .gsap-hero h1, .gsap-hero p, .gsap-auth; presentation rules do not change queue data or permissions. */
 .gsap-float, .gsap-card, .gsap-stagger, .gsap-fade, .gsap-zoom, .gsap-hero h1, .gsap-hero p, .gsap-auth {
     /* visibility: hidden; */
 }
 
+/* Style @keyframes floatAppetizing; presentation rules do not change queue data or permissions. */
 @keyframes floatAppetizing {
   0% { transform: translate(0, 0) scale(1) rotate(0deg); }
   100% { transform: translate(80px, 60px) scale(1.15) rotate(10deg); }
 }
 
+/* Style .glass-panel; presentation rules do not change queue data or permissions. */
 .glass-panel {
   background: var(--glass-bg);
   backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -81,11 +90,13 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; let
   border-radius: var(--border-radius-xl); transition: var(--transition-bouncy);
 }
 
+/* Style .glass-panel:hover; presentation rules do not change queue data or permissions. */
 .glass-panel:hover {
   transform: translateY(-4px); border-color: rgba(255, 149, 0, 0.5);
   box-shadow: 0 20px 40px -10px rgba(255, 59, 48, 0.3);
 }
 
+/* Style .btn-primary; presentation rules do not change queue data or permissions. */
 .btn-primary {
   background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
   color: #FFF; border: none; padding: 16px 32px; border-radius: 100px;
@@ -100,12 +111,14 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; let
 .form-group { margin-bottom: 1.5rem; }
 .form-label { display: block; margin-bottom: 0.5rem; font-size: 0.95rem; color: var(--text-secondary); font-weight: 600; }
 
+/* Style .form-input; presentation rules do not change queue data or permissions. */
 .form-input {
   width: 100%; padding: 16px 20px; background: var(--bg-secondary); border: 2px solid transparent;
   border-radius: var(--border-radius-lg); color: var(--text-primary); font-family: var(--font-body); font-size: 1.05rem; transition: var(--transition-bouncy);
 }
 .form-input:focus { outline: none; background: var(--bg-primary); border-color: var(--accent-orange); box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2); }
 
+/* Style .theme-toggle; presentation rules do not change queue data or permissions. */
 .theme-toggle {
   position: fixed; top: 32px; right: 32px; background: var(--glass-bg); border: 2px solid var(--glass-border);
   color: var(--text-primary); width: 54px; height: 54px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
@@ -113,6 +126,7 @@ h1, h2, h3, h4, h5, h6 { font-family: var(--font-heading); font-weight: 700; let
 }
 .theme-toggle:hover { transform: scale(1.15) rotate(15deg); background: var(--accent-yellow); border-color: var(--accent-yellow); color: #2D1810; }
 
+/* Style .text-gradient; presentation rules do not change queue data or permissions. */
 .text-gradient {
   background: linear-gradient(135deg, var(--accent-red), var(--accent-orange));
   -webkit-background-clip: text; -webkit-text-fill-color: transparent;

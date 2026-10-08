@@ -1,3 +1,4 @@
+// VIVA GUIDE: Request filter protecting older endpoints using authenticated ownership/service checks. Not a substitute for current service validation.
 package com.queue.filter;
 
 import com.queue.service.BookingService;
@@ -12,6 +13,7 @@ import java.util.Set;
 /** Protect the existing personal student routes as well as the new portal. */
 @WebFilter(urlPatterns = {"/api/queue/*", "/api/bookings/*", "/create-booking", "/cancel-booking", "/booking-status"})
 public class StudentOwnershipFilter implements Filter {
+    // Checks authenticated identity against claimed IDs/booking ownership on protected older routes before invoking the next filter/servlet.
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest req = (HttpServletRequest) request;
         HttpServletResponse res = (HttpServletResponse) response;
@@ -46,6 +48,7 @@ public class StudentOwnershipFilter implements Filter {
         } catch (NumberFormatException error) { reject(res, 400, "Invalid account or booking identifier."); return; }
         chain.doFilter(request, response);
     }
+    // Stops the request with the chosen HTTP status and a JSON error envelope.
     private void reject(HttpServletResponse res, int status, String message) throws IOException {
         res.setStatus(status); res.setContentType("application/json"); res.setCharacterEncoding("UTF-8");
         res.getWriter().write(Json.encode(Map.of("success", false, "message", message)));

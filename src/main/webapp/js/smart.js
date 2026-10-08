@@ -1,9 +1,11 @@
+// VIVA GUIDE: Retained fixed-slot/JSP browser helpers for older booking and analytics pages. Current student reservations use React, student-api.js and ReservationService.
 /**
  * smart.js - Client-side AJAX/fetch functions for Smart Module (Member 4)
  * Handles Slot Loading, Pre-Booking, Cancellation, and Analytics Refresh.
  */
 
 // Helper to get base path
+// Named helper getBasePath: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function getBasePath() {
     return window.location.pathname.substring(0, window.location.pathname.indexOf('/', 1)) || '';
 }
@@ -12,6 +14,7 @@ function getBasePath() {
  * Loads available slots for a given service and date via AJAX.
  * Updates the #slotsContainer element in pre-booking.jsp.
  */
+// Named helper loadAvailableSlots: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function loadAvailableSlots(serviceId, bookingDate) {
     const container = document.getElementById("slotsContainer");
     if (!container) return;
@@ -75,6 +78,7 @@ function loadAvailableSlots(serviceId, bookingDate) {
 /**
  * Submits appointment booking request using AJAX.
  */
+// Named helper createBooking: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function createBooking(studentId, serviceId, bookingDate, bookingTime) {
     const submitBtn = document.getElementById("submitBtn");
     if (submitBtn) {
@@ -126,6 +130,7 @@ function createBooking(studentId, serviceId, bookingDate, bookingTime) {
 /**
  * Cancels a booking using AJAX.
  */
+// Named helper cancelBooking: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function cancelBooking(bookingId, studentId) {
     if (!confirm(`Are you sure you want to cancel booking #${bookingId}?`)) {
         return;
@@ -167,6 +172,7 @@ function cancelBooking(bookingId, studentId) {
 /**
  * Refreshes real-time analytics data via AJAX.
  */
+// Named helper refreshAnalytics: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function refreshAnalytics() {
     const url = `${getBasePath()}/analytics?format=json`;
 
@@ -217,6 +223,7 @@ function refreshAnalytics() {
 /**
  * Helper to display alerts in #alertPlaceholder
  */
+// Named helper showAlert: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function showAlert(type, message) {
     const placeholder = document.getElementById("alertPlaceholder");
     if (!placeholder) return;

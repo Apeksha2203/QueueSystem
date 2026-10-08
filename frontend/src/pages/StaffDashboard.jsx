@@ -1,3 +1,4 @@
+// VIVA GUIDE: Staff dashboard orchestration: polls endpoints, derives assigned current service, runs actions and refreshes UI state.
 import StudentPhone from '../components/StudentPhone'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { api } from '../services/api'
@@ -12,18 +13,27 @@ const pageLabels = {
   analytics: ['ANALYTICS', 'Analytics'],
 }
 
+// Coordinate staff summary, queue, counter and activity data; backend responses determine state and available actions.
 export default function StaffDashboard({ staff, onLogout, page = 'dashboard', onNavigate }) {
+  // Staff dashboard metrics returned by the service-scoped summary endpoint.
   const [summary, setSummary] = useState(null)
+  // Staff service queue returned by the backend; ticket assignment controls visible actions.
   const [queue, setQueue] = useState([])
+  // Availability and assignment details for the signed-in staff counter.
   const [counter, setCounter] = useState(null)
+  // Recent service activity displayed by ActivityFeed.
   const [activity, setActivity] = useState([])
+  // An action is pending; disable related controls to reduce repeated submissions.
   const [busy, setBusy] = useState(false)
+  // User-facing request/form error; empty text means there is no current error banner.
   const [error, setError] = useState('')
+  // Time when the latest staff data load finished, shown to the operator.
   const [lastUpdated, setLastUpdated] = useState(null)
 
   const load = useCallback(async (silent = false) => {
     try {
       if (!silent) setError('')
+      // Load independent endpoints concurrently, then apply their returned data to UI state.
       const [summaryResult, queueResult, counterResult, activityResult] = await Promise.all([
         api.summary(), api.queue(), api.counterStatus(), api.recentActivity(),
       ])
@@ -41,15 +51,20 @@ export default function StaffDashboard({ staff, onLogout, page = 'dashboard', on
     }
   }, [onLogout])
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     load()
+    // Polling refreshes the server view periodically; the effect cleanup must clear this timer.
+    // Refresh summary, queue, availability and activity every seven seconds; cleanup stops polling.
     const timer = setInterval(() => load(true), 7000)
     return () => clearInterval(timer)
   }, [load])
 
+  // Select this operator's assigned SERVING ticket first, otherwise their CALLED ticket; another counter's ticket is not current.
   const currentService = useMemo(() => queue.find(q => q.counterId === staff.counterId && q.assignedStaffId === staff.staffId && q.status === 'SERVING') || queue.find(q => q.counterId === staff.counterId && q.assignedStaffId === staff.staffId && q.status === 'CALLED'), [queue, staff.counterId, staff.staffId])
   const waiting = queue.filter(q => q.status === 'WAITING').length
 
+  // Disable repeated UI actions while awaiting the server, then reload dashboard data; finally clears busy state.
   async function runAction(action) {
     try {
       setBusy(true)
@@ -137,6 +152,7 @@ export default function StaffDashboard({ staff, onLogout, page = 'dashboard', on
   )
 }
 
+// Named helper DashboardView: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function DashboardView({ staff, summary, queue, waiting, counter, activity, busy, runAction, currentService, statusClass }) {
   return <>
     <section className="stats-grid">
@@ -180,6 +196,7 @@ function DashboardView({ staff, summary, queue, waiting, counter, activity, busy
   </>
 }
 
+// Named helper QueueManagementView: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function QueueManagementView({ staff, queue, waiting, counter, busy, runAction }) {
   return <>
     <section className="stats-grid compact-stats">
@@ -195,6 +212,7 @@ function QueueManagementView({ staff, queue, waiting, counter, busy, runAction }
   </>
 }
 
+// Named helper BookingsView: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function BookingsView({ summary, queue }) {
   return <section className="page-grid">
     <div className="panel info-panel">

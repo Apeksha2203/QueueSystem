@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained queue read/DAO operations and student ticket projections. Current transactional writes are mainly in ReservationService.
 package com.queue.dao;
 
 import com.queue.model.Queue;
@@ -13,6 +14,7 @@ public class QueueDAO {
     // STUDENT QUEUE OPERATIONS
     // =========================
 
+    // Perform join queue; inspect its conditions, affected rows and return value before describing success.
     public boolean joinQueue(Queue queue) {
         try {
             java.util.Map<String,Object> result=new com.queue.service.ReservationService().reserve(queue.getStudentId(),queue.getServiceId());
@@ -20,6 +22,7 @@ public class QueueDAO {
         } catch (IllegalArgumentException conflict) { return false; }
         catch (java.sql.SQLException error) { throw new IllegalStateException("Unable to reserve a place.",error); }
     }
+    // Retrieve queue status for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Queue getQueueStatus(int studentId, int serviceId) {
 
         String sql =
@@ -52,10 +55,12 @@ public class QueueDAO {
     }
 
 
+    // Retrieve queue position for the caller; follow the SQL/service delegation to identify scope and return shape.
     public int getQueuePosition(int studentId,int serviceId) {
         try { java.util.Map<String,Object> preview=new com.queue.service.ReservationService().preview(studentId,serviceId);return preview.get("queueId")==null?-1:((Number)preview.get("position")).intValue(); }
         catch(Exception error) { throw new IllegalStateException("Unable to read queue position.",error); }
     }
+    // Retrieve current token for the caller; follow the SQL/service delegation to identify scope and return shape.
     public int getCurrentToken(int serviceId) {
 
         String sql =
@@ -86,6 +91,7 @@ public class QueueDAO {
         return 0;
     }
 
+    // Retrieve active queue for the caller; follow the SQL/service delegation to identify scope and return shape.
     public java.util.List<Queue> getActiveQueue(int serviceId) {
 
     java.util.List<Queue> queueList =
@@ -125,6 +131,7 @@ public class QueueDAO {
     // STAFF QUEUE OPERATIONS
     // =========================
 
+    // Perform call student; inspect its conditions, affected rows and return value before describing success.
     public Queue callStudent(int queueId) {
 
     String sql =
@@ -155,6 +162,7 @@ public class QueueDAO {
     return null;
 }
 
+    // Perform call next; inspect its conditions, affected rows and return value before describing success.
     public Queue callNext(int serviceId) {
 
         String findSql =
@@ -226,6 +234,7 @@ public class QueueDAO {
     }
 
 
+    // Perform start service; inspect its conditions, affected rows and return value before describing success.
     public boolean startService(int queueId) {
 
         String sql =
@@ -253,6 +262,7 @@ public class QueueDAO {
     }
 
 
+    // Perform complete service; inspect its conditions, affected rows and return value before describing success.
     public boolean completeService(int queueId) {
 
         String sql =
@@ -280,6 +290,7 @@ public class QueueDAO {
     }
 
 
+    // Perform skip student; inspect its conditions, affected rows and return value before describing success.
     public boolean skipStudent(int queueId) {
 
         String sql =
@@ -306,6 +317,7 @@ public class QueueDAO {
         return false;
     }
 
+    // Retrieve recent activity for the caller; follow the SQL/service delegation to identify scope and return shape.
     public java.util.List<Queue> getRecentActivity(int serviceId) {
 
     java.util.List<Queue> activityList =
@@ -354,6 +366,7 @@ public class QueueDAO {
     // HELPER METHODS
     // =========================
 
+    // Retrieve queue by id for the caller; follow the SQL/service delegation to identify scope and return shape.
     public Queue getQueueById(int queueId) {
 
     try (
@@ -368,6 +381,7 @@ public class QueueDAO {
     return null;
 }
 
+    // Retrieve queue by id for the caller; follow the SQL/service delegation to identify scope and return shape.
     private Queue getQueueById(Connection connection,
                                int queueId) throws Exception {
 
@@ -395,6 +409,7 @@ public class QueueDAO {
     }
 
 
+    // Convert a JDBC row into the queue object used by callers.
     private Queue mapQueue(ResultSet resultSet)
             throws Exception {
 

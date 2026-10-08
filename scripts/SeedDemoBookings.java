@@ -1,3 +1,4 @@
+// VIVA GUIDE: Explicit demonstration fixture seeder for older booking flows; running a fixture tool changes data and is not normal request handling.
 import com.queue.util.*;
 import com.queue.service.ServiceHours;
 import java.sql.*;
@@ -6,22 +7,26 @@ import java.util.*;
 
 /** Local load-test fixtures: intentionally bypass capacity admission to exercise long queues. */
 class SeedDemoBookings {
+ // Operation insert: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
  static int insert(Connection c,String sql,Object...args)throws SQLException {
   try(PreparedStatement p=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
    for(int i=0;i<args.length;i++)p.setObject(i+1,args[i]);p.executeUpdate();
    try(ResultSet r=p.getGeneratedKeys()){return r.next()?r.getInt(1):0;}
   }
  }
+ // Operation number: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
  static int number(Connection c,String sql,Object...args)throws SQLException {
   try(PreparedStatement p=c.prepareStatement(sql)) {
    for(int i=0;i<args.length;i++)p.setObject(i+1,args[i]);
    try(ResultSet r=p.executeQuery()){return r.next()?r.getInt(1):0;}
   }
  }
+ // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
  public static void main(String[] args)throws Exception {
   LocalDate day=ServiceHours.now().toLocalDate();
   String passwordHash=Passwords.hash(UUID.randomUUID().toString());
   try(Connection c=DBConnection.getConnection()) {
+   // Group related writes; commit saves them together and rollback prevents partial updates.
    c.setAutoCommit(false);
    try {
     for(String serviceName:List.of("General Inquiries","Fee Payment","Document Verification")) {

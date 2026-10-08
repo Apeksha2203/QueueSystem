@@ -1,3 +1,4 @@
+// VIVA GUIDE: Supporting source or configuration. Check the entry point or caller, inputs, outputs and failure handling when explaining this file.
 package com.queue.util;
 
 import java.sql.Connection;
@@ -14,6 +15,7 @@ public class DBConnectionExample {
     private static final String PASSWORD =
             "YOUR_MYSQL_PASSWORD";
 
+    // Retrieve connection for the caller; follow the SQL/service delegation to identify scope and return shape.
     public static Connection getConnection() throws SQLException {
 
         try {

@@ -1,4 +1,6 @@
+// VIVA GUIDE: Queue rows and state/ownership-based action buttons. Server checks remain authoritative.
 import StudentPhone from './StudentPhone'
+// Render queue rows and eligible action buttons based on status and assignment; hiding buttons does not replace backend checks.
 export default function QueueTable({queue,busy,staff,onStart,onComplete,onNoShow}) {
   return <div className="table-wrap"><table><thead><tr><th>Token</th><th>Queue ID</th><th>Student</th><th>Status</th><th>Action</th></tr></thead><tbody>{queue.map(q=>{
     const owned=q.counterId===staff?.counterId&&q.assignedStaffId===staff?.staffId;

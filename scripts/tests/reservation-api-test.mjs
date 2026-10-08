@@ -1,3 +1,4 @@
+// VIVA GUIDE: Explicit regression/fixture tool: inspect assertions and cleanup; database checks use their configured database. Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 import assert from 'node:assert/strict';
 import { randomBytes } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
@@ -10,8 +11,10 @@ const env={...process.env,QUEUE_DB_CONFIG:path.join(repo,'config/db.local.proper
 const fixture=(...args)=>execFileSync(java,['-cp',`${repo}/target/classes;${repo}/target/dependency/*`,`${repo}/scripts/tests/IntegrationFixtures.java`,...args],{env,encoding:'utf8'}).trim();
 const serviceId=Number(fixture('create',`Visit API ${email}`,staffEmail));
 const base=process.env.QUEUE_FRONTEND_URL||'http://127.0.0.1:5173';
+// Named helper client: read its arguments and return value; callers determine whether it renders UI or performs an action.
 function client(){let cookie='';return async(route,payload)=>{const r=await fetch(base+route,{method:payload?'POST':'GET',headers:{Cookie:cookie,'X-Requested-With':'XMLHttpRequest'},body:payload?new URLSearchParams(payload):undefined});for(const v of r.headers.getSetCookie())if(v.startsWith('JSESSIONID='))cookie=v.split(';')[0];return {status:r.status,body:await r.json()};};}
 const student=client(),anonymous=client();let count=0;
+// Arrow-function helper check: keeps this operation reusable at its call sites.
 const check=(ok,label)=>{assert.ok(ok,label);count++;console.log(`PASS ${label}`);};
 try {
   check((await anonymous(`/api/student/bookings/preview?serviceId=${serviceId}`)).status===401,'preview requires student authentication');

@@ -1,3 +1,4 @@
+// VIVA GUIDE: Staff Vite configuration: development server and backend API forwarding. Netlify handles the deployed proxy separately.
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 

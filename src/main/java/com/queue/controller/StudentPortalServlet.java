@@ -1,3 +1,4 @@
+// VIVA GUIDE: Current student HTTP adapter. Routes login/register/session/overview/preview/reserve/cancel; obtains identity from the server session.
 package com.queue.controller;
 
 import com.queue.dao.CounterDAO;
@@ -29,9 +30,13 @@ public class StudentPortalServlet extends HttpServlet {
     private final WaitingTimeService waiting = new WaitingTimeService();
     private final CounterDAO counters = new CounterDAO();
 
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest req, HttpServletResponse res) throws IOException { handle(req, res); }
+    // Handle HTTP POST requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doPost(HttpServletRequest req, HttpServletResponse res) throws IOException { handle(req, res); }
 
+    // Dispatches the student route, validates inputs and derives personal identity from the server session before accessing reservations.
+    // The servlet is the HTTP boundary; ReservationService owns transactional queue rules.
     private void handle(HttpServletRequest req, HttpServletResponse res) throws IOException {
         res.setContentType("application/json");
         res.setCharacterEncoding("UTF-8");
@@ -137,19 +142,23 @@ public class StudentPortalServlet extends HttpServlet {
         catch (java.sql.SQLException error) { fail(res, 503, "The database is unavailable. Please try again shortly."); }
         catch (IllegalStateException error) { fail(res, 503, "The operation could not be saved. Please try again shortly."); }
     }
+    // Rejects service identifiers not found in the current catalogue.
     private void requireService(int id) {
         if (services.getAllServices().stream().noneMatch(service -> service.getServiceId() == id))
             throw new IllegalArgumentException("Unknown service");
     }
+    // Rejects absent/blank request input before the caller parses or uses it.
     private String required(HttpServletRequest req, String name) {
         String value = req.getParameter(name);
         if (value == null || value.isBlank()) throw new IllegalArgumentException(name);
         return value;
     }
+    // Writes the student API success/data envelope using the JSON serializer.
     private void ok(HttpServletResponse res, Object data) throws IOException {
         Map<String,Object> body = new LinkedHashMap<>(); body.put("success", true); body.put("data", data);
         res.getWriter().write(Json.encode(body));
     }
+    // Sets the HTTP failure status and writes a success:false message envelope.
     private void fail(HttpServletResponse res, int status, String message) throws IOException {
         res.setStatus(status); res.getWriter().write(Json.encode(Map.of("success", false, "message", message)));
     }

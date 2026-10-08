@@ -1,3 +1,4 @@
+// VIVA GUIDE: Student development/build configuration: React plugin and /api proxy. The local proxy differs from production Netlify rewrites.
 import { defineConfig, loadEnv } from 'vite'
 import react from '@vitejs/plugin-react'
 

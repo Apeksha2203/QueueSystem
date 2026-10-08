@@ -1,3 +1,4 @@
+# VIVA GUIDE: Earlier workspace-specific Maven/Tomcat launcher. Inspect its hard-coded tool paths; scripts/start-backend.ps1 is the documented isolated launcher.
 # Build and Run Script for QueueSystem
 $ErrorActionPreference = "Stop"
 

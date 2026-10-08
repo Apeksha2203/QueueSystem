@@ -1,3 +1,4 @@
+// VIVA GUIDE: Older student HTTP surface. Compare with current StudentPortalServlet before claiming this is the active UI route.
 package com.queue.controller;
 
 import com.queue.model.Student;
@@ -17,11 +18,13 @@ public class StudentServlet extends HttpServlet {
     private StudentService studentService;
 
     @Override
+    // Initialize servlet dependencies once when Tomcat creates the servlet.
     public void init() {
         studentService = new StudentService();
     }
 
     @Override
+    // Handle HTTP POST requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doPost(HttpServletRequest request,
                            HttpServletResponse response)
             throws ServletException, IOException {
@@ -145,6 +148,7 @@ public class StudentServlet extends HttpServlet {
         );
     }
 
+    // Operation writeError: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     private void writeError(HttpServletResponse response,
                             String message)
             throws IOException {

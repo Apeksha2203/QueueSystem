@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained older appointment no-show handling. Current queue absence rules are in ReservationService.
 package com.queue.service;
 
 import com.queue.model.Booking;
@@ -23,18 +24,22 @@ public class NoShowService {
 
     private int gracePeriodMinutes;
 
+    // Initialize this object; inspect arguments/field assignments for the values it carries.
     public NoShowService() {
         this.gracePeriodMinutes = DEFAULT_GRACE_PERIOD_MINUTES;
     }
 
+    // Initialize this object; inspect arguments/field assignments for the values it carries.
     public NoShowService(int gracePeriodMinutes) {
         this.gracePeriodMinutes = gracePeriodMinutes > 0 ? gracePeriodMinutes : DEFAULT_GRACE_PERIOD_MINUTES;
     }
 
+    // Retrieve grace period minutes for the caller; follow the SQL/service delegation to identify scope and return shape.
     public int getGracePeriodMinutes() {
         return gracePeriodMinutes;
     }
 
+    // Operation setGracePeriodMinutes: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public void setGracePeriodMinutes(int gracePeriodMinutes) {
         this.gracePeriodMinutes = gracePeriodMinutes > 0 ? gracePeriodMinutes : DEFAULT_GRACE_PERIOD_MINUTES;
     }
@@ -43,6 +48,7 @@ public class NoShowService {
      * Evaluates if a given booking has exceeded its appointment time plus the grace period.
      * Example: Booking Time = 10:30, Grace Period = 5 mins, Current Time > 10:35 -> true
      */
+    // Operation isNoShow: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public boolean isNoShow(Booking booking, int graceMinutes) {
         if (booking == null || !"BOOKED".equalsIgnoreCase(booking.getStatus())) {
             return false;
@@ -69,6 +75,7 @@ public class NoShowService {
         return false;
     }
 
+    // Operation isNoShow: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public boolean isNoShow(Booking booking) {
         return isNoShow(booking, this.gracePeriodMinutes);
     }
@@ -79,6 +86,7 @@ public class NoShowService {
      *
      * @return Number of bookings updated to NO_SHOW
      */
+    // Operation checkAndUpdateNoShows: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public int checkAndUpdateNoShows() {
         return checkAndUpdateNoShows(this.gracePeriodMinutes);
     }
@@ -86,6 +94,7 @@ public class NoShowService {
     /**
      * Scans and marks no-show bookings with a specified grace period.
      */
+    // Operation checkAndUpdateNoShows: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public int checkAndUpdateNoShows(int graceMinutes) {
         int updatedCount = 0;
 
@@ -137,6 +146,7 @@ public class NoShowService {
     /**
      * Marks a specific booking as NO_SHOW by booking ID.
      */
+    // Operation markAsNoShow: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     public boolean markAsNoShow(int bookingId) {
         String updateSql = "UPDATE bookings SET status = ? WHERE booking_id = ? AND status = 'BOOKED'";
 

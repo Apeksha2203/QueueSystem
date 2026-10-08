@@ -1,3 +1,4 @@
+// VIVA GUIDE: Staff HTTP adapter for login, profile, service queue, counter availability, summary and activity. Study service scoping and remaining legacy branches.
 package com.queue.controller;
 
 import com.queue.model.Staff;
@@ -25,6 +26,7 @@ public class StaffServlet extends HttpServlet {
 private BookingService bookingService;
 
     @Override
+// Initialize servlet dependencies once when Tomcat creates the servlet.
 public void init() {
     staffService = new StaffService();
     analyticsService = new AnalyticsService();
@@ -36,6 +38,7 @@ public void init() {
     // =========================
 
     @Override
+    // Handle HTTP POST requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doPost(HttpServletRequest request,
                           HttpServletResponse response)
             throws ServletException, IOException {
@@ -72,6 +75,7 @@ public void init() {
             if (staff != null) {
 
                 HttpSession session = request.getSession();
+                // Rotate the session identifier after authentication to reduce session-fixation risk.
                 request.changeSessionId();
                 session.removeAttribute("studentId");
                 session.setAttribute("staffId", staff.getStaffId());
@@ -198,6 +202,7 @@ public void init() {
     // =========================
 
     @Override
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
             throws ServletException, IOException {

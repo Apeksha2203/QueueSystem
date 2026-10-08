@@ -1,3 +1,4 @@
+# VIVA GUIDE: Student cloud build: build React, generate API/SPA rewrites, publish dist and use the specified Node runtime.
 [build]
 command = "npm run build && node ../scripts/netlify-redirects.mjs"
 publish = "dist"

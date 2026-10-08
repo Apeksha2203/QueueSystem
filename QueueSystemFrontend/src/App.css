@@ -1,3 +1,5 @@
+/* VIVA GUIDE: Retained student stylesheet. Current main.jsx/App.jsx do not import it; a file in the repo is not necessarily executed. */
+/* Style .counter; presentation rules do not change queue data or permissions. */
 .counter {
   font-size: 16px;
   padding: 5px 10px;
@@ -17,6 +19,7 @@
   }
 }
 
+/* Style .hero; presentation rules do not change queue data or permissions. */
 .hero {
   position: relative;
 
@@ -56,6 +59,7 @@
   }
 }
 
+/* Style #center; presentation rules do not change queue data or permissions. */
 #center {
   display: flex;
   flex-direction: column;
@@ -70,6 +74,7 @@
   }
 }
 
+/* Style #next-steps; presentation rules do not change queue data or permissions. */
 #next-steps {
   display: flex;
   border-top: 1px solid var(--border);
@@ -95,6 +100,7 @@
   }
 }
 
+/* Style #docs; presentation rules do not change queue data or permissions. */
 #docs {
   border-right: 1px solid var(--border);
 
@@ -104,6 +110,7 @@
   }
 }
 
+/* Style #next-steps ul; presentation rules do not change queue data or permissions. */
 #next-steps ul {
   list-style: none;
   padding: 0;
@@ -153,6 +160,7 @@
   }
 }
 
+/* Style #spacer; presentation rules do not change queue data or permissions. */
 #spacer {
   height: 88px;
   border-top: 1px solid var(--border);
@@ -161,6 +169,7 @@
   }
 }
 
+/* Style .ticks; presentation rules do not change queue data or permissions. */
 .ticks {
   position: relative;
   width: 100%;

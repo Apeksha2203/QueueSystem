@@ -1,3 +1,4 @@
+// VIVA GUIDE: Recent completed processing samples and estimate helpers. Distinguish measured average from configuration fallback and preview rounding.
 package com.queue.service;
 
 import com.queue.util.DBConnection;
@@ -23,6 +24,7 @@ public class WaitingTimeService {
      * @param activeStaff   Number of active staff currently serving
      * @return String description of estimated wait time or SERVICE CURRENTLY UNAVAILABLE
      */
+    // Formats the estimated wait for legacy callers and reports unavailable when active staff is zero.
     public String calculateEstimatedWaitingTime(int serviceId, int studentsAhead, int activeStaff) {
         if (activeStaff <= 0) {
             return SERVICE_UNAVAILABLE;
@@ -48,6 +50,7 @@ public class WaitingTimeService {
      * Calculates estimated waiting time in minutes as an integer.
      * Returns -1 if activeStaff is 0 or negative.
      */
+    // Uses people ahead times average minutes divided by active staff; returns -1 when no staff capacity is available.
     public int calculateEstimatedWaitMinutes(int serviceId, int studentsAhead, int activeStaff) {
         if (activeStaff <= 0) {
             return -1;
@@ -66,7 +69,9 @@ public class WaitingTimeService {
      * First checks historical completed records from the queue table.
      * If no completed records exist, falls back to the configured service table average.
      */
+    // Averages positive durations from up to twenty recent completed records, using measured seconds or scheduled-window timestamps; falls back to configured minutes when no samples exist.
     public double getAverageServiceTime(int serviceId) {
+        // Use at most twenty recent completed samples, not waiting/booking duration, as the processing-time estimate.
         String historicalSql="SELECT started_at,completed_at,processing_seconds FROM queue WHERE service_id=? AND status='COMPLETED' AND started_at IS NOT NULL AND completed_at>started_at ORDER BY completed_at DESC,queue_id DESC LIMIT 20";
         try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement(historicalSql)) {
             p.setInt(1,serviceId);try(ResultSet r=p.executeQuery()) {

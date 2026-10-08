@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- VIVA GUIDE: Maven Java 17 WAR project. Servlet API is provided by Tomcat; the MySQL JDBC driver is packaged with the application. -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

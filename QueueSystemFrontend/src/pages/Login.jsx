@@ -1,15 +1,20 @@
+// VIVA GUIDE: Retained earlier student implementation, outside the current main.jsx -> App.jsx import path. Older student page retained alongside the current App.jsx component implementation. Check imports before treating it as an active production screen.
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 import { ArrowRight, Moon, Sun } from 'lucide-react';
 
+// Arrow-function helper Login: keeps this operation reusable at its call sites.
 const Login = () => {
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [isLogin, setIsLogin] = useState(true);
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [isDarkMode, setIsDarkMode] = useState(
     document.documentElement.getAttribute('data-theme') === 'dark' || localStorage.getItem('theme') === 'dark'
   );
   const navigate = useNavigate();
 
+  // Arrow-function helper toggleTheme: keeps this operation reusable at its call sites.
   const toggleTheme = () => {
     const nextMode = !isDarkMode;
     setIsDarkMode(nextMode);
@@ -22,6 +27,7 @@ const Login = () => {
     }
   };
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     // Initial mount animations
     gsap.fromTo(".gsap-hero h1", { y: 30, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 1, ease: "power3.out" });
@@ -31,11 +37,13 @@ const Login = () => {
   }, []);
 
   // When isLogin changes, animate the new form in
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     const activeForm = isLogin ? ".login-form" : ".register-form";
     gsap.fromTo(activeForm, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.4, ease: "power2.out" });
   }, [isLogin]);
 
+  // Arrow-function helper switchForm: keeps this operation reusable at its call sites.
   const switchForm = () => {
     const currentForm = isLogin ? ".login-form" : ".register-form";
     
@@ -50,6 +58,7 @@ const Login = () => {
     });
   };
 
+  // Arrow-function helper handleAuth: keeps this operation reusable at its call sites.
   const handleAuth = (e) => {
     e.preventDefault();
     navigate('/dashboard');

@@ -1,7 +1,9 @@
+// VIVA GUIDE: Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 package com.queue.dao;
 
 public class CurrentTokenTest {
 
+    // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
     public static void main(String[] args) {
 
         QueueDAO queueDAO = new QueueDAO();

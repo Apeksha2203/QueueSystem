@@ -1,5 +1,7 @@
+// VIVA GUIDE: Staff HTTP adapter: cookie-backed requests, JSON errors and form-encoded counter/queue actions. UI buttons call these helpers; MySQL is accessed only by Java.
 const API_BASE = "/api";
 
+// Send a cookie-backed staff request and reject failed/non-JSON responses before screens consume the payload.
 async function apiRequest(url, options = {}) {
     const response = await fetch(`${API_BASE}${url}`, {
         credentials: "include",
@@ -25,6 +27,7 @@ async function apiRequest(url, options = {}) {
     return data;
 }
 
+// Encode form fields with URLSearchParams for the servlet request parameters.
 function formBody(values) {
     return new URLSearchParams(values);
 }
@@ -89,6 +92,7 @@ export const api = {
         queueAction("/skip", queueId),
 };
 
+// Submit the queue ID as a form-encoded staff POST; the Java service checks ownership and state transitions.
 function queueAction(path, queueId) {
     return apiRequest(`/queue${path}`, {
         method: "POST",

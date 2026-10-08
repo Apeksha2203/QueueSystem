@@ -1,3 +1,4 @@
+# VIVA GUIDE: Reuses the shared PDF generator to produce the personal student frontend preparation guide.
 """Build the student frontend preparation PDF with the shared guide style."""
 import importlib.util
 from pathlib import Path

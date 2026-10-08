@@ -1,3 +1,5 @@
+// VIVA GUIDE: Validated telephone display and tel link. Device-mediated calling; no server telephony or queue mutation.
+// Validate/display a phone number with a tel link; the device places the call, not the queue server.
 export default function StudentPhone({ phone, name = 'student' }) {
   const number = String(phone || '').replace(/[\s()-]/g, '')
   if (!/^\+?[0-9]{10,15}$/.test(number)) return <span>Phone not provided</span>

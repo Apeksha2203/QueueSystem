@@ -1,3 +1,4 @@
+// VIVA GUIDE: Explicit schema/migration runner for local provisioning. A deployment does not automatically execute these scripts merely by pushing Git.
 package com.queue.util;
 
 import java.nio.file.Files;
@@ -7,6 +8,7 @@ import java.sql.Statement;
 
 /** Explicit local setup command; never runs automatically when the web application starts. */
 public final class DatabaseSetup {
+    // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
     public static void main(String[] args) throws Exception {
         if (args.length != 1) throw new IllegalArgumentException("Supply the schema file path.");
         String schema = Files.readString(Path.of(args[0])).replaceAll("(?m)^\\s*--.*$", "");

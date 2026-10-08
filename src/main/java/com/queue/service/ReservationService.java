@@ -1,3 +1,4 @@
+// VIVA GUIDE: Core transaction coordinator. Study preview, reserve, operate, callNext, cancellation, availability and closing rollover. Follow the service lock and commit/rollback boundary.
 package com.queue.service;
 
 import com.queue.util.*;
@@ -9,10 +10,14 @@ import java.util.*;
 /** Service-day FIFO with stable tokens, transactional counter ownership and missed turns. */
 public class ReservationService {
     private final LocalDateTime fixedNow;
+    // Initialize this object; inspect arguments/field assignments for the values it carries.
     public ReservationService(){fixedNow=null;}
+    // Initialize this object; inspect arguments/field assignments for the values it carries.
     public ReservationService(LocalDateTime at){fixedNow=at;}
+    // Uses an injected clock for deterministic tests, otherwise the campus clock; never mixes the browser clock into authorization.
     private LocalDateTime now(){return fixedNow==null?ServiceHours.now():fixedNow;}
     private static final String ACTIVE="('WAITING','CALLED','SERVING')";
+    // Binds SQL arguments in order, executes a SELECT and maps each row by column label; try-with-resources closes statement/result set.
     private List<Map<String,Object>> rows(Connection c,String sql,Object...args)throws SQLException {
         try(PreparedStatement p=c.prepareStatement(sql)) {
             for(int i=0;i<args.length;i++)p.setObject(i+1,args[i]);
@@ -22,15 +27,20 @@ public class ReservationService {
             }
         }
     }
+    // Binds SQL arguments and executes a write on the supplied connection; the caller owns commit/rollback.
     private int update(Connection c,String sql,Object...args)throws SQLException {
         try(PreparedStatement p=c.prepareStatement(sql)){for(int i=0;i<args.length;i++)p.setObject(i+1,args[i]);return p.executeUpdate();}
     }
+    // Converts a numeric database-map value to int, treating a missing/null value as zero.
     private int number(Map<String,Object> row,String key){return row.get(key)==null?0:((Number)row.get(key)).intValue();}
+    // Writes an audit event for this ticket; student/system actions use a null staff ID.
     private void event(Connection c,int queue,int staff,String type)throws SQLException {update(c,"INSERT INTO queue_events(queue_id,staff_id,event_type) VALUES (?,?,?)",queue,staff==0?null:staff,type);}
+    // Builds the service-day position and ETA view. CALLED/SERVING tickets precede WAITING tickets; carried tickets retain their destination day.
     public Map<String,Object> preview(int student,int service)throws SQLException {
         closeWaiting(service);
         try(Connection c=DBConnection.getConnection()){return preview(c,student,service);}
     }
+    // Builds the service-day position and ETA view. CALLED/SERVING tickets precede WAITING tickets; carried tickets retain their destination day.
     private Map<String,Object> preview(Connection c,int student,int service)throws SQLException {
         LocalDateTime at=now();LocalDate day=at.toLocalDate();
         LocalDateTime requestedAt=at;
@@ -46,8 +56,10 @@ public class ReservationService {
         int available=number(rows(c,"SELECT COUNT(*) n FROM counters WHERE service_id=? AND is_active=TRUE",service).get(0),"n");
         int planned=number(rows(c,"SELECT COUNT(*) n FROM counters WHERE service_id=?",service).get(0),"n");
         boolean open=ServiceHours.open(at), closed=ServiceHours.nextOpen(at)==null;
+        // Use currently active counters during service; use scheduled counters for pre-opening/carryover projections.
         int capacity=open&&!carried?available:planned;
         LocalDateTime projected=capacity>0?ServiceHours.project(at,(long)Math.ceil(ahead*new WaitingTimeService().getAverageServiceTime(service)/capacity)):null;
+        // An estimate at or after 3 PM is a closing risk; preserve the projection for a clear student warning.
         boolean closingRisk="WAITING".equals(status)&&projected!=null&&!projected.isBefore(day.atTime(15,0));
         LocalDateTime estimate=closingRisk?null:projected;
         if(Set.of("CALLED","SERVING").contains(status))estimate=at;
@@ -68,15 +80,20 @@ public class ReservationService {
         }
         return result;
     }
+    // Locks the service row, rechecks availability, allocates token/order and inserts ticket, reservation and audit event in one transaction.
     public Map<String,Object> reserve(int student,int service)throws SQLException {
         try(Connection c=DBConnection.getConnection()) {
+            // Use READ_COMMITTED and explicit transactions so service-row locks protect a consistent validation/write sequence.
             c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);c.setAutoCommit(false);
             try {
+                // Serialize this service's operations before allocating order or changing ticket state.
                 if(!TransactionLocks.service(c,service))throw new IllegalArgumentException("Unknown service.");
                 Map<String,Object> preview=preview(c,student,service);
                 if(!Boolean.TRUE.equals(preview.get("canReserve")))throw new IllegalArgumentException((String)preview.get("message"));
                 LocalDate day=now().toLocalDate();
+                // Allocate a stable service token while holding the service lock; token identity is separate from mutable daily queue order.
                 int token=number(rows(c,"SELECT COALESCE(MAX(token_number),0)+1 n FROM queue WHERE service_id=?",service).get(0),"n");
+                // Append to this service day's queue order; missed calls/rollover may later change order without changing the token.
                 int order=number(rows(c,"SELECT COALESCE(MAX(r.queue_order),0)+1 n FROM queue_reservations r JOIN queue q ON q.queue_id=r.queue_id WHERE q.service_id=? AND r.visit_date=?",service,day).get(0),"n");
                 int id;try(PreparedStatement p=c.prepareStatement("INSERT INTO queue(student_id,service_id,token_number,status) VALUES (?,?,?,'WAITING')",Statement.RETURN_GENERATED_KEYS)){p.setInt(1,student);p.setInt(2,service);p.setInt(3,token);p.executeUpdate();try(ResultSet keys=p.getGeneratedKeys()){keys.next();id=keys.getInt(1);}}
                 update(c,"INSERT INTO queue_reservations(queue_id,visit_date,queue_order) VALUES (?,?,?)",id,day,order);event(c,id,0,"RESERVED");
@@ -84,25 +101,30 @@ public class ReservationService {
             }catch(Exception error){c.rollback();throw error;}
         }
     }
+    // Reconciles pending carryovers, then returns only this student's reservations for history/upcoming display.
     public List<Map<String,Object>> visits(int student)throws SQLException {
         closeWaitingForStudent(student);
         try(Connection c=DBConnection.getConnection()) {
             return rows(c,"SELECT q.queue_id AS id,q.service_id AS serviceId,r.visit_date AS date,q.token_number AS token,q.status,r.missed_turns AS missedTurns FROM queue q JOIN queue_reservations r ON r.queue_id=q.queue_id WHERE q.student_id=? ORDER BY r.visit_date DESC,q.queue_id DESC",student);
         }
     }
+    // Looks up the staff member's service and returns that service's active tickets for the campus day, including assignment/contact fields.
     public List<Map<String,Object>> staffQueue(int staff)throws SQLException {
         try(Connection c=DBConnection.getConnection()){List<Map<String,Object>> assignment=rows(c,"SELECT service_id FROM staff WHERE staff_id=?",staff);if(!assignment.isEmpty())closeWaiting(number(assignment.get(0),"service_id"));}
         try(Connection c=DBConnection.getConnection()) {
             return rows(c,"SELECT q.queue_id AS queueId,q.student_id AS studentId,student.student_name AS studentName,student.email AS studentEmail,student.phone AS studentPhone,q.service_id AS serviceId,q.token_number AS tokenNumber,q.status,r.counter_id AS counterId,r.staff_id AS assignedStaffId,r.missed_turns AS missedTurns FROM queue q JOIN queue_reservations r ON r.queue_id=q.queue_id JOIN students student ON student.student_id=q.student_id JOIN staff s ON s.service_id=q.service_id WHERE s.staff_id=? AND r.visit_date=? AND q.status IN "+ACTIVE+" ORDER BY CASE WHEN q.status='WAITING' THEN 1 ELSE 0 END,r.queue_order,q.queue_id",staff,now().toLocalDate());
         }
     }
+    // Enforces staff service/counter ownership and valid ticket transitions under locks. First miss moves back up to ten places; second miss ends the ticket.
     public Map<String,Object> operate(int staff,String action,int queue)throws SQLException {
         try(Connection c=DBConnection.getConnection()) {
+            // Use READ_COMMITTED and explicit transactions so service-row locks protect a consistent validation/write sequence.
             c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);c.setAutoCommit(false);
             try {
                 List<Map<String,Object>> profiles=rows(c,"SELECT * FROM staff WHERE staff_id=?",staff);
                 if(profiles.isEmpty())throw new IllegalArgumentException("Staff account not found.");
                 int service=number(profiles.get(0),"service_id"), counter=number(profiles.get(0),"counter_id");
+                // Serialize this service's operations before allocating order or changing ticket state.
                 if(!TransactionLocks.service(c,service))throw new IllegalArgumentException("Service not found.");
                 List<Map<String,Object>> counters=rows(c,"SELECT * FROM counters WHERE counter_id=? AND service_id=? FOR UPDATE",counter,service);
                 if(counters.isEmpty())throw new IllegalArgumentException("Your counter assignment is invalid.");
@@ -122,9 +144,11 @@ public class ReservationService {
                 if(action.equals("no-show")) {
                     if(!status.equals("CALLED"))throw new IllegalArgumentException("Only a called student can miss a turn.");
                     int misses=number(records.get(0),"missed_turns")+1;
+                    // Second missed call ends the ticket with NO_SHOW instead of moving it again.
                     if(misses>=2) {update(c,"UPDATE queue SET status='NO_SHOW',completed_at=CURRENT_TIMESTAMP WHERE queue_id=?",queue);update(c,"UPDATE queue_reservations SET missed_turns=? WHERE queue_id=?",misses,queue);event(c,queue,staff,"REMOVED_SECOND_MISS");}
                     else {
                         List<Map<String,Object>> waiting=rows(c,"SELECT q.queue_id FROM queue q JOIN queue_reservations r ON r.queue_id=q.queue_id WHERE q.service_id=? AND r.visit_date=? AND q.status='WAITING' ORDER BY r.queue_order,q.queue_id",service,day);
+                        // First missed call moves behind at most ten waiting students; never index beyond the current list.
                         int insertion=Math.min(10,waiting.size());waiting.add(insertion,Map.of("queue_id",queue));
                         // Re-index all waiting entries; called/serving entries are ahead independently.
                         int order=1;for(Map<String,Object> row:waiting)update(c,"UPDATE queue_reservations SET queue_order=? WHERE queue_id=?",order++,number(row,"queue_id"));
@@ -156,12 +180,15 @@ public class ReservationService {
             }catch(Exception error){c.rollback();throw error;}
         }
     }
+    // Checks whether the latest summon marker matches morning/afternoon; prevents an automatic recall across the lunch boundary.
     private boolean sameOperatingWindow(Connection c,int queue)throws SQLException {
         String expected=now().toLocalTime().isBefore(LocalTime.of(13,0))?"SUMMON_MORNING":"SUMMON_AFTERNOON";
         List<Map<String,Object>> markers=rows(c,"SELECT event_type FROM queue_events WHERE queue_id=? AND event_type IN ('SUMMON_MORNING','SUMMON_AFTERNOON') ORDER BY event_id DESC LIMIT 1",queue);
         return !markers.isEmpty() && expected.equals(markers.get(0).get("event_type"));
     }
+    // Selects the eligible waiting ticket in queue order and assigns it to this staff/counter; the enclosing transaction holds the service lock.
     private Map<String,Object> callNext(Connection c,int service,int counter,int staff,LocalDate day,int requested)throws SQLException{return callNext(c,service,counter,staff,day,requested,0);}
+    // Selects the eligible waiting ticket in queue order and assigns it to this staff/counter; the enclosing transaction holds the service lock.
     private Map<String,Object> callNext(Connection c,int service,int counter,int staff,LocalDate day,int requested,int exclude)throws SQLException {
         List<Map<String,Object>> waiting=rows(c,"SELECT q.queue_id AS queueId,q.student_id AS studentId,q.service_id AS serviceId,q.token_number AS tokenNumber FROM queue q JOIN queue_reservations r ON r.queue_id=q.queue_id WHERE q.service_id=? AND r.visit_date=? AND q.status='WAITING' AND q.queue_id<>? ORDER BY r.queue_order,q.queue_id LIMIT 1 FOR UPDATE",service,day,exclude);
         if(waiting.isEmpty()){if(requested>0)throw new IllegalArgumentException("No waiting student.");return null;}
@@ -170,12 +197,15 @@ public class ReservationService {
         update(c,"UPDATE queue SET status='CALLED',called_at=CURRENT_TIMESTAMP WHERE queue_id=?",id);
         update(c,"UPDATE queue_reservations SET counter_id=?,staff_id=? WHERE queue_id=?",counter,staff,id);event(c,id,staff,"CALLED");event(c,id,staff,now().toLocalTime().isBefore(LocalTime.of(13,0))?"SUMMON_MORNING":"SUMMON_AFTERNOON");next.put("counterId",counter);next.put("status","CALLED");return next;
     }
+    // Cancels only the authenticated student's eligible same-day WAITING reservation; other students' tickets cannot be cancelled.
     public boolean cancel(int student,int queue)throws SQLException {
         try(Connection c=DBConnection.getConnection()) {return update(c,"UPDATE queue q JOIN queue_reservations r ON r.queue_id=q.queue_id SET q.status='CANCELLED',q.completed_at=CURRENT_TIMESTAMP WHERE q.queue_id=? AND q.student_id=? AND q.status='WAITING' AND r.visit_date=?",queue,student,now().toLocalDate())==1;}
     }
+    // Returns the stored counter state, falling back to is_active when no explicit state row exists.
     public boolean availability(int staff,String status)throws SQLException {
         if(!Set.of("AVAILABLE","PAUSED","CHECKED_OUT").contains(status))throw new IllegalArgumentException("Invalid counter status.");
         try(Connection c=DBConnection.getConnection()) {
+            // Group related writes; commit saves them together and rollback prevents partial updates.
             c.setAutoCommit(false);
             try {
                 List<Map<String,Object>> profile=rows(c,"SELECT service_id,counter_id FROM staff WHERE staff_id=?",staff);
@@ -188,6 +218,7 @@ public class ReservationService {
             }catch(Exception error){c.rollback();throw error;}
         }
     }
+    // Returns the stored counter state, falling back to is_active when no explicit state row exists.
     public String availability(int counter)throws SQLException {
         try(Connection c=DBConnection.getConnection()) {
             List<Map<String,Object>> result=rows(c,"SELECT COALESCE(s.status,IF(c.is_active,'AVAILABLE','CHECKED_OUT')) status FROM counters c LEFT JOIN counter_states s ON s.counter_id=c.counter_id WHERE c.counter_id=?",counter);
@@ -195,13 +226,17 @@ public class ReservationService {
         }
     }
     /** No absence penalty: only WAITING tickets expire, under the same service lock as calls. */
+    // Carries overdue WAITING tickets to the next applicable service day, preserving their priority; closing is not a missed-call penalty.
     public int closeWaiting(int service)throws SQLException {
         LocalDateTime at=now();LocalDate day=at.toLocalDate();boolean closed=!at.toLocalTime().isBefore(LocalTime.of(15,0));
         try(Connection c=DBConnection.getConnection()) {
+            // Use READ_COMMITTED and explicit transactions so service-row locks protect a consistent validation/write sequence.
             c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);c.setAutoCommit(false);
             try {
+                // Serialize this service's operations before allocating order or changing ticket state.
                 if(!TransactionLocks.service(c,service)){c.rollback();return 0;}
                 List<Map<String,Object>> due=rows(c,"SELECT q.queue_id FROM queue q JOIN queue_reservations r ON r.queue_id=q.queue_id WHERE q.service_id=? AND q.status='WAITING' AND (r.visit_date<? OR (r.visit_date=? AND ?)) ORDER BY r.visit_date,r.queue_order,q.queue_id FOR UPDATE",service,day,day,closed);
+                // After closing carry to tomorrow; overdue tickets reconciled before closing target the current service day.
                 LocalDate destination=closed?day.plusDays(1):day;
                 int order=0;
                 // Carryovers take priority over new reservations already made for the destination.
@@ -211,9 +246,11 @@ public class ReservationService {
             }catch(Exception error){c.rollback();throw error;}
         }
     }
+    // Reconciles pending tickets only for services in which this student has a WAITING record.
     private void closeWaitingForStudent(int student)throws SQLException {
         try(Connection c=DBConnection.getConnection()){for(Map<String,Object> row:rows(c,"SELECT DISTINCT service_id FROM queue WHERE student_id=? AND status='WAITING'",student))closeWaiting(number(row,"service_id"));}
     }
+    // Reconciles every service with WAITING tickets; called/serving tickets are not rollover candidates.
     public void closeAllDue()throws SQLException {
         try(Connection c=DBConnection.getConnection()){for(Map<String,Object> row:rows(c,"SELECT DISTINCT service_id FROM queue WHERE status='WAITING'"))closeWaiting(number(row,"service_id"));}
     }

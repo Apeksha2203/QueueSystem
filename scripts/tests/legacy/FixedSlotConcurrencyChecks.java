@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained fixed-slot regression checks; not the current same-day reservation suite. Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 import com.queue.dao.QueueDAO;
 import com.queue.model.Queue;
 import com.queue.model.Booking;
@@ -12,10 +13,12 @@ import java.util.concurrent.*;
 class ConcurrencyChecks {
     static final List<Integer> students=new ArrayList<>(), services=new ArrayList<>();
     static int checks;
+    // Operation check: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static void check(boolean condition,String label) {
         if(!condition) throw new AssertionError(label);
         System.out.println("PASS "+label);checks++;
     }
+    // Operation insert: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static int insert(String sql,Object...values) throws Exception {
         try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)) {
             for(int i=0;i<values.length;i++)p.setObject(i+1,values[i]);p.executeUpdate();
@@ -32,8 +35,11 @@ class ConcurrencyChecks {
             for(Future<T> f:pending)results.add(f.get(45,TimeUnit.SECONDS));return results;
         } finally { pool.shutdownNow();pool.awaitTermination(10,TimeUnit.SECONDS); }
     }
+    // Operation ticket: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static Queue ticket(int student,int service) {Queue q=new Queue();q.setStudentId(student);q.setServiceId(service);return q;}
+    // Operation booking: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static Booking booking(int student,int service,String time) {Booking b=new Booking();b.setStudentId(student);b.setServiceId(service);b.setBookingDate(java.sql.Date.valueOf(LocalDate.now().plusDays(2)));b.setBookingTime(Time.valueOf(time));return b;}
+    // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
     public static void main(String[] args) throws Exception {
         String run=UUID.randomUUID().toString();
         try {
@@ -57,6 +63,7 @@ class ConcurrencyChecks {
             System.out.println(checks+" concurrency checks passed.");
         } finally {
             try(Connection c=DBConnection.getConnection()) {
+                // Group related writes; commit saves them together and rollback prevents partial updates.
                 c.setAutoCommit(false);
                 try {
                     for(int service:services)for(String table:List.of("queue","bookings","services"))try(PreparedStatement p=c.prepareStatement("DELETE FROM "+table+" WHERE service_id=?")){p.setInt(1,service);p.executeUpdate();}

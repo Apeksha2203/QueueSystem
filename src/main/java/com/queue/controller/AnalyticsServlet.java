@@ -1,3 +1,4 @@
+// VIVA GUIDE: Staff analytics request adapter. Explains how authenticated service-specific statistics are exposed.
 package com.queue.controller;
 
 import com.queue.service.AnalyticsService;
@@ -18,6 +19,7 @@ public class AnalyticsServlet extends HttpServlet {
     private final AnalyticsService analyticsService = new AnalyticsService();
 
     @Override
+    // Handle HTTP GET requests for this servlet mapping; validate input/session before returning HTML or JSON.
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 

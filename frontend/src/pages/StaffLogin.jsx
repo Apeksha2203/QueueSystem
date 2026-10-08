@@ -1,13 +1,21 @@
+// VIVA GUIDE: Staff login form and error/busy handling. Uses the shared API adapter; it does not read MySQL directly.
 import { useState } from 'react'
 import { api } from '../services/api'
 
+// Render the staff sign-in form and surface request errors; assigned service/counter come from the backend profile.
 export default function StaffLogin({ onLogin }) {
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [email, setEmail] = useState('')
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [password, setPassword] = useState('')
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [showPassword, setShowPassword] = useState(false)
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [loading, setLoading] = useState(false)
+  // User-facing request/form error; empty text means there is no current error banner.
   const [error, setError] = useState('')
 
+ // Named helper submit: read its arguments and return value; callers determine whether it renders UI or performs an action.
  async function submit(event) {
   event.preventDefault()
   setError('')

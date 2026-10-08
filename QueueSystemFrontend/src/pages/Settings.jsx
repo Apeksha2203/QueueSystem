@@ -1,14 +1,18 @@
+// VIVA GUIDE: Retained earlier student implementation, outside the current main.jsx -> App.jsx import path. Older student page retained alongside the current App.jsx component implementation. Check imports before treating it as an active production screen.
 import React, { useEffect, useState } from 'react';
 import { User, Bell, LogOut, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
 
+// Arrow-function helper Settings: keeps this operation reusable at its call sites.
 const Settings = () => {
   const navigate = useNavigate();
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [isDarkMode, setIsDarkMode] = useState(
     document.documentElement.getAttribute('data-theme') === 'dark' || localStorage.getItem('theme') === 'dark'
   );
 
+  // Arrow-function helper toggleTheme: keeps this operation reusable at its call sites.
   const toggleTheme = () => {
     const nextMode = !isDarkMode;
     setIsDarkMode(nextMode);
@@ -21,6 +25,7 @@ const Settings = () => {
     }
   };
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     gsap.fromTo(".gsap-stagger", { y: 20, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.1, ease: "power2.out" });
     gsap.fromTo(".gsap-card", { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.8, stagger: 0.15, ease: "back.out(1.2)", delay: 0.2 });

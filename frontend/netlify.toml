@@ -1,3 +1,4 @@
+# VIVA GUIDE: Staff cloud build: generate the production bundle and API/SPA rewrites, then publish dist.
 [build]
 command = "npm run build && node ../scripts/netlify-redirects.mjs"
 publish = "dist"

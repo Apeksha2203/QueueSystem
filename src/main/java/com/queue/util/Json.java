@@ -1,9 +1,12 @@
+// VIVA GUIDE: Recursive JSON serializer for null, number, boolean, maps, lists and escaped string values.
 package com.queue.util;
 
 import java.util.Map;
 
 public final class Json {
+    // Initialize this object; inspect arguments/field assignments for the values it carries.
     private Json() {}
+    // Recursively serializes supported values; escapes string content so quotes/control characters remain valid JSON.
     public static String encode(Object value) {
         if (value == null) return "null";
         if (value instanceof Number || value instanceof Boolean) return value.toString();

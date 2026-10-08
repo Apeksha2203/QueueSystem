@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained earlier student implementation, outside the current main.jsx -> App.jsx import path. Older student page retained alongside the current App.jsx component implementation. Check imports before treating it as an active production screen.
 import React, { useState, useEffect } from 'react';
 import { ChevronRight, Users, Coins, MapPin, Library, FileText, Clock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -11,11 +12,15 @@ const iconMap = {
   "Library Services": <Library size={36} />
 };
 
+// Arrow-function helper Dashboard: keeps this operation reusable at its call sites.
 const Dashboard = () => {
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [services, setServices] = useState([]);
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     // Fetch services from our Tomcat backend via Vite proxy
     fetch('/api/services')
@@ -47,6 +52,7 @@ const Dashboard = () => {
       });
   }, []);
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     if (!loading && services.length > 0) {
       gsap.fromTo('.service-card', 
@@ -56,6 +62,7 @@ const Dashboard = () => {
     }
   }, [loading, services]);
 
+  // Arrow-function helper handleServiceClick: keeps this operation reusable at its call sites.
   const handleServiceClick = (service) => {
     navigate(`/queue?serviceId=${service.serviceId}&name=${encodeURIComponent(service.serviceName)}`);
   };

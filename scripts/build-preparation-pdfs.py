@@ -1,3 +1,4 @@
+# VIVA GUIDE: ReportLab document generator: shared styles, prose parsing, table of contents and source appendix. Source line references reflect generation time.
 """Build the two academic guides from prose plus the actual tracked source snapshot.
 Requires reportlab and pypdf; rendering QA uses pypdfium2.
 """
@@ -25,22 +26,27 @@ STYLES.add(ParagraphStyle(name='GuideH2', fontName='Helvetica-Bold', fontSize=13
 STYLES.add(ParagraphStyle(name='GuideCode', fontName='Courier', fontSize=7.1, leading=10, textColor=INK, spaceAfter=10))
 STYLES.add(ParagraphStyle(name='GuideSmall', fontName='Helvetica', fontSize=8.5, leading=12, textColor=INK, spaceAfter=7))
 
+# Helper ascii_text: read its inputs and result; resources/outputs are created only when this helper is called.
 def ascii_text(value):
     replacements = {'\u2013':'-', '\u2014':'-', '\u2011':'-', '\u2019':"'", '\u2018':"'", '\u201c':'"', '\u201d':'"', '\u2026':'...', '\u2192':'->', '\u00a0':' '}
     for a,b in replacements.items(): value = value.replace(a,b)
     return value.encode('ascii', 'backslashreplace').decode('ascii')
 
+# Helper paragraph: read its inputs and result; resources/outputs are created only when this helper is called.
 def paragraph(text, style='BodyGuide'):
     text = escape(ascii_text(text))
     text = re.sub(r'(https://[^\s]+)', r'<link href="\1" color="#d34e26">\1</link>', text)
     return Paragraph(text, STYLES[style])
 
+# Class GuideDoc groups related document/setup behavior.
 class GuideDoc(BaseDocTemplate):
+    # Helper __init__: read its inputs and result; resources/outputs are created only when this helper is called.
     def __init__(self, filename, label, **kwargs):
         super().__init__(str(filename), pagesize=A4, leftMargin=48, rightMargin=48, topMargin=54, bottomMargin=48, **kwargs)
         self.label = label
         self.heading_number = 0
         self.addPageTemplates(PageTemplate(id='guide', frames=Frame(48,48,A4[0]-96,A4[1]-102,id='body'), onPage=self.decorate))
+    # Helper decorate: read its inputs and result; resources/outputs are created only when this helper is called.
     def decorate(self, canvas, doc):
         canvas.saveState()
         canvas.setStrokeColor(ORANGE); canvas.setLineWidth(1)
@@ -50,8 +56,10 @@ class GuideDoc(BaseDocTemplate):
         canvas.drawString(48,28,'Academic preparation | 8 October 2026 | Source snapshot on main')
         canvas.drawRightString(A4[0]-48,28,str(doc.page))
         canvas.restoreState()
+    # Helper beforeDocument: read its inputs and result; resources/outputs are created only when this helper is called.
     def beforeDocument(self):
         self.heading_number = 0
+    # Helper afterFlowable: read its inputs and result; resources/outputs are created only when this helper is called.
     def afterFlowable(self, flowable):
         if isinstance(flowable, Paragraph) and flowable.style.name == 'GuideH1' and self.page > 1 and flowable.getPlainText() != 'Contents':
             level = 0
@@ -60,6 +68,7 @@ class GuideDoc(BaseDocTemplate):
             self.canv.bookmarkPage(key)
             self.notify('TOCEntry',(level,flowable.getPlainText(),self.page,key))
 
+# Helper code_blocks: read its inputs and result; resources/outputs are created only when this helper is called.
 def code_blocks(lines, numbered=False):
     result=[];wrapped=[]
     for i,line in enumerate(lines,1):
@@ -73,9 +82,11 @@ def code_blocks(lines, numbered=False):
         result.append(Preformatted('\n'.join(wrapped[at:at+44]), STYLES['GuideCode']))
     return result
 
+# Helper prose: read its inputs and result; resources/outputs are created only when this helper is called.
 def prose(path, compact=False):
     lines=path.read_text(encoding='utf-8').splitlines()
     story=[];buffer=[];code=[];in_code=False
+    # Helper flush: read its inputs and result; resources/outputs are created only when this helper is called.
     def flush():
         if buffer: story.append(paragraph(' '.join(buffer))); buffer.clear()
     for line in lines:
@@ -137,6 +148,7 @@ ROLES = {
  'create-cloud-staff-seed.py':'Local staff provisioning generator using standard-library PBKDF2. Generated SQL stays in ignored .runtime; plaintext input is not committed.',
 }
 
+# Helper role: read its inputs and result; resources/outputs are created only when this helper is called.
 def role(path):
     name=path.name;rel=path.relative_to(ROOT).as_posix()
     if name=='App.jsx':return ('Current student component tree, landing/login and authenticated routes. Study BookingForm, Ticket, VirtualQueue and Experience.' if rel.startswith('QueueSystemFrontend/') else 'Staff BrowserRouter, restored login session, navigation and dashboard composition.')
@@ -152,6 +164,7 @@ def role(path):
     if name.endswith('.ps1'):return 'Local PowerShell setup/start/configuration utility. Read path resolution and ignored config handling before execution.'
     return 'Supporting source or configuration. Check the entry point or caller, inputs, outputs and failure handling when explaining this file.'
 
+# Helper explain: read its inputs and result; resources/outputs are created only when this helper is called.
 def explain(line):
     s=line.strip()
     if 'FOR UPDATE' in s:return 'This SQL requests row locks. Explain which row is locked and where commit or rollback releases it.'
@@ -175,12 +188,14 @@ def explain(line):
     if 'return' in s and ('Map' in s or 'json' in s.lower()):return 'Builds the response consumed by another layer. Identify which fields the frontend renders.'
     return None
 
+# Helper tracked_files: read its inputs and result; resources/outputs are created only when this helper is called.
 def tracked_files():
     git=['git','-c','safe.directory='+str(ROOT).replace('\\','/'),'ls-files']
     names=subprocess.check_output(git,cwd=ROOT,text=True).splitlines()
     allowed={'.java','.jsx','.js','.css','.sql','.jsp','.ps1','.mjs','.py','.xml','.toml','.html'}
     return [ROOT/n for n in names if Path(n).suffix in allowed and not n.startswith(('docs/','output/')) and '/public/fonts/' not in n and (ROOT/n).is_file()]
 
+# Helper append_source: read its inputs and result; resources/outputs are created only when this helper is called.
 def append_source(story):
     files=tracked_files()
     story += [PageBreak(),paragraph('35. File inventory and responsibility map','GuideH1'),paragraph('This inventory includes retained legacy files and standalone diagnostics. A file being present is not proof it is executed by the current React flow. Follow the imports, servlet mappings and documented current path.')]
@@ -213,6 +228,7 @@ def append_source(story):
         story.append(paragraph('The full stylesheet stays in the repository. Explain selectors, cascade, variables, box sizing, flex/grid, media queries and focus styles using this opening excerpt, then navigate to the actual selected rule.'))
         story.extend(code_blocks(lines[:90],True))
 
+# Helper build: read its inputs and result; resources/outputs are created only when this helper is called.
 def build(name,title,subtitle,source,appendix=False):
     doc=GuideDoc(OUT/name,subtitle,title=title,author='Campus Queue project team')
     cover=[Spacer(1,105),paragraph('CAMPUS QUEUE','GuideH1'),Spacer(1,12),paragraph(title,'GuideH1'),paragraph(subtitle),Spacer(1,20),paragraph('Prepared for project demonstration, code review and academic viva.'),paragraph('8 October 2026'),Spacer(1,25),paragraph('Verified source, practical SQL and honest implementation boundaries. Credentials are deliberately excluded.'),PageBreak(),paragraph('Contents','GuideH1')]

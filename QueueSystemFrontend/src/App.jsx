@@ -1,3 +1,4 @@
+// VIVA GUIDE: Current student component tree, landing/login and authenticated routes. Study BookingForm, Ticket, VirtualQueue and Experience.
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   HashRouter,
@@ -40,9 +41,11 @@ const nav = [
   ["/bookings", CalendarDays, "Bookings"],
   ["/settings", SettingsIcon, "Settings"],
 ];
+// Render the logo/home link; this is reusable presentation, not an API call.
 function Brand() {
   return <Link className="brand cq-brand" to="/" aria-label="Campus Queue home"><img className="cq-symbol" src="/campus-queue-logo.svg" alt=""/><span className="cq-wordmark"><span>Campus</span><strong>Queue</strong></span></Link>;
 }
+// Render the accessible appearance-switch button; its parent owns the dark/light state.
 function Theme({ dark, toggle }) {
   return (
     <button
@@ -54,6 +57,7 @@ function Theme({ dark, toggle }) {
     </button>
   );
 }
+// Reuse the same title/description/action layout across student screens.
 function PageHeading({ eyebrow, title, description, children }) {
   return (
     <header className="page-heading">
@@ -66,6 +70,7 @@ function PageHeading({ eyebrow, title, description, children }) {
     </header>
   );
 }
+// Render backend ticket fields and status/counter messaging; tokens and queue priority are determined on the server.
 function Ticket({ ticket, compact = false }) {
   return (
     <article className={`ticket ${compact ? "compact-ticket" : ""}`}>
@@ -103,11 +108,14 @@ function Ticket({ ticket, compact = false }) {
     </article>
   );
 }
+// Draw people ahead using queueLayout coordinates; large counts are grouped visually, not removed from the real queue.
 function VirtualQueue({ ticket }) {
   const scene = useRef(null);
   const hasPosition = useRef(false);
   const layout = queueLayout(ticket?.ahead ?? 4);
   const { ahead, grouped, hidden, people, you: position } = layout;
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
+  // Animate the YOU marker when server people-ahead changes; initialize without a jump and kill old tweens on cleanup.
   useLayoutEffect(() => {
     const marker = scene.current?.querySelector(".virtual-you");
     if (!marker) return;
@@ -180,8 +188,10 @@ function VirtualQueue({ ticket }) {
     </div>
   );
 }
+// Render service choices and the selected ticket from backend state.
 function Overview({ ticket, profile, join, catalog, busy }) {
   const location = useLocation();
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     if (location.state?.scrollToServices) {
       const frame = requestAnimationFrame(() => document.getElementById("services")?.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "start" }));
@@ -333,7 +343,9 @@ function Overview({ ticket, profile, join, catalog, busy }) {
     </>
   );
 }
+// Display the selected active ticket and eligible queue actions; server validation is still authoritative.
 function QueuePage({ ticket, tickets, selectTicket, refresh, backend }) {
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [cancelling,setCancelling]=useState(null);
   if (!ticket) return <><PageHeading eyebrow="YOUR PLACE IN LINE" title={<>A ticket to <span className="serif">more time.</span></>} description="You don’t have an active ticket yet." /><div className="empty-state"><TicketIcon size={55}/><h2>Where are we headed?</h2><p>Choose a service to join its queue.</p><Link to="/dashboard" state={{ scrollToServices: true }} className="button primary">Explore services <ArrowRight size={18}/></Link></div></>;
   const called = ticket.status === "CALLED";
@@ -354,8 +366,10 @@ function QueuePage({ ticket, tickets, selectTicket, refresh, backend }) {
     {cancelling && <Modal title="Cancel this ticket?" close={()=>{if(!backend.busy)setCancelling(null);}}><p>{cancelling.serviceName} · Token {String(cancelling.token).padStart(3,'0')}</p><p className="muted">Cancelling removes your place in this queue. A new booking will put you at the end of the queue.</p><button className="button secondary" disabled={backend.busy} onClick={()=>setCancelling(null)}>Keep ticket</button><button className="button primary" disabled={backend.busy} onClick={async()=>{try{await backend.action('/bookings/cancel',{bookingId:cancelling.queueId});setCancelling(null);}catch{}}}>{backend.busy ? 'Cancelling…' : 'Confirm cancellation'}</button></Modal>}
   </>;
 }
+// Provide a reusable dialog and its close/keyboard behavior.
 function Modal({ title, close, children }) {
   const ref = useRef(null);
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     const prior = document.activeElement;
     const dialog = ref.current;
@@ -381,20 +395,28 @@ function Modal({ title, close, children }) {
     </dialog>
   );
 }
+// Poll the selected service preview, then submit only the service ID to reserve; the backend revalidates at confirmation.
 function BookingForm({ catalog, backend, close, initialServiceId }) {
+  // Selected service for the preview and reservation POST.
   const [serviceId,setServiceId]=useState(String(initialServiceId || catalog[0]?.serviceId||""));
+  // Latest backend projection; do not treat an earlier preview as a guaranteed reservation.
   const [preview,setPreview]=useState(null);
+  // User-facing request/form error; empty text means there is no current error banner.
   const [error,setError]=useState("");
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(()=>{
     if(!serviceId)return;
+    // Abort obsolete previews when service selection changes; inflight prevents overlapping requests.
     const controller=new AbortController();let inflight=false;
     setPreview(null);setError("");
+    // Named helper load: read its arguments and return value; callers determine whether it renders UI or performs an action.
     async function load(){
       if(inflight)return;inflight=true;
       try {const data=await studentRequest(`/bookings/preview?serviceId=${serviceId}`,undefined,controller.signal);if(!controller.signal.aborted){setPreview(data);setError("");}}
       catch(failure){if(failure.name!=="AbortError"){setError(failure.message);setPreview(null);}}
       finally{inflight=false;}
     }
+    // Refresh the reservation preview every five seconds; stop polling when the dialog closes.
     load();const timer=setInterval(load,5000);
     return ()=>{controller.abort();clearInterval(timer);};
   },[serviceId]);
@@ -577,6 +599,7 @@ function Experience() {
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
 
   useEffect(() => {
+    // Apply the CSS theme and save only this preference in localStorage, not a login token.
     document.documentElement.dataset.theme = dark ? "dark" : "light";
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
@@ -674,6 +697,7 @@ function Experience() {
         </div>
         <main>
           {backend.error && <div className="backend-error" role="alert">{backend.error}<button className="text-button" onClick={() => backend.refresh().catch(() => {})}>Try again</button></div>}
+          {/* Each route renders a student screen with shared backend state; unauthenticated users are handled above. */}
           <Routes>
             <Route
               path="/dashboard"

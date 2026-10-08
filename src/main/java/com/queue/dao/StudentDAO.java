@@ -1,3 +1,4 @@
+// VIVA GUIDE: Student SQL storage/login operations, password verification and hash migration. Read PreparedStatement bindings and generated IDs.
 package com.queue.dao;
 
 import com.queue.model.Student;
@@ -10,6 +11,7 @@ import java.sql.ResultSet;
 
 public class StudentDAO {
 
+    // Inserts validated student fields with a password hash using bound SQL parameters.
     public boolean registerStudent(Student student) {
         com.queue.util.StudentValidation.registration(student);
 
@@ -38,6 +40,7 @@ public class StudentDAO {
     }
 
 
+    // Finds the account by email, verifies the password and migrates a successfully authenticated legacy password to a hash.
     public Student loginStudent(String email, String password) {
 
         String sql = "SELECT * FROM students " +

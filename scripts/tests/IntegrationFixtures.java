@@ -1,7 +1,9 @@
+// VIVA GUIDE: Explicit regression/fixture tool: inspect assertions and cleanup; database checks use their configured database. Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 import java.sql.*;
 import com.queue.util.DBConnection;
 
 class IntegrationFixtures {
+  // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
   public static void main(String[] args) throws Exception {
     try (Connection c = DBConnection.getConnection()) {
       if (args[0].equals("create")) {
@@ -22,6 +24,7 @@ class IntegrationFixtures {
         try(PreparedStatement check=c.prepareStatement("SELECT description FROM services WHERE service_id=?")) {
           check.setInt(1,service);try(ResultSet r=check.executeQuery()){if(!r.next()||!r.getString(1).equals("Temporary integration fixture"))throw new IllegalArgumentException("Not a test fixture");}
         }
+        // Group related writes; commit saves them together and rollback prevents partial updates.
         c.setAutoCommit(false);
         try {
           for(String table:new String[]{"bookings","queue","staff","counters","services"}) {

@@ -1,3 +1,4 @@
+# VIVA GUIDE: Interactive local database configuration: writes credentials to an ignored properties file rather than committing passwords.
 param(
     [string]$DatabaseHost = '127.0.0.1',
     [int]$Port = 3306,

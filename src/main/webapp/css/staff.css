@@ -1,7 +1,9 @@
+/* VIVA GUIDE: Stylesheet controls appearance and responsiveness, not authorization or database state. The student currently imports original-identity.css; retained themes may be legacy. */
 /* =========================================================
    GLOBAL
    ========================================================= */
 
+/* Style *; presentation rules do not change queue data or permissions. */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -9,6 +11,7 @@
 }
 
 
+/* Define shared theme variables used by later component rules. */
 :root {
 
     --navy: #102a43;
@@ -44,6 +47,7 @@
 }
 
 
+/* Style body; presentation rules do not change queue data or permissions. */
 body {
 
     font-family:
@@ -64,18 +68,21 @@ body {
 
 
 button,
+/* Style input; presentation rules do not change queue data or permissions. */
 input {
 
     font: inherit;
 }
 
 
+/* Style button; presentation rules do not change queue data or permissions. */
 button {
 
     cursor: pointer;
 }
 
 
+/* Style button:disabled; presentation rules do not change queue data or permissions. */
 button:disabled {
 
     cursor: not-allowed;
@@ -89,6 +96,7 @@ button:disabled {
    LOGIN
    ========================================================= */
 
+/* Style .login-page; presentation rules do not change queue data or permissions. */
 .login-page {
 
     min-height: 100vh;
@@ -110,6 +118,7 @@ button:disabled {
 }
 
 
+/* Style .login-container; presentation rules do not change queue data or permissions. */
 .login-container {
 
     width: 100%;
@@ -118,6 +127,7 @@ button:disabled {
 }
 
 
+/* Style .login-card; presentation rules do not change queue data or permissions. */
 .login-card {
 
     background:
@@ -137,6 +147,7 @@ button:disabled {
 }
 
 
+/* Style .login-logo; presentation rules do not change queue data or permissions. */
 .login-logo {
 
     width: 58px;
@@ -163,6 +174,7 @@ button:disabled {
 }
 
 
+/* Style .login-card h1; presentation rules do not change queue data or permissions. */
 .login-card h1 {
 
     font-size: 30px;
@@ -174,6 +186,7 @@ button:disabled {
 }
 
 
+/* Style .login-subtitle; presentation rules do not change queue data or permissions. */
 .login-subtitle {
 
     color:
@@ -183,12 +196,14 @@ button:disabled {
 }
 
 
+/* Style .form-group; presentation rules do not change queue data or permissions. */
 .form-group {
 
     margin-bottom: 20px;
 }
 
 
+/* Style .form-group label; presentation rules do not change queue data or permissions. */
 .form-group label {
 
     display: block;
@@ -201,6 +216,7 @@ button:disabled {
 }
 
 
+/* Style .form-group input; presentation rules do not change queue data or permissions. */
 .form-group input {
 
     width: 100%;
@@ -222,6 +238,7 @@ button:disabled {
 }
 
 
+/* Style .form-group input:focus; presentation rules do not change queue data or permissions. */
 .form-group input:focus {
 
     border-color:
@@ -233,12 +250,14 @@ button:disabled {
 }
 
 
+/* Style .password-wrapper; presentation rules do not change queue data or permissions. */
 .password-wrapper {
 
     position: relative;
 }
 
 
+/* Style .password-wrapper input; presentation rules do not change queue data or permissions. */
 .password-wrapper input {
 
     padding-right:
@@ -246,6 +265,7 @@ button:disabled {
 }
 
 
+/* Style .password-toggle; presentation rules do not change queue data or permissions. */
 .password-toggle {
 
     position: absolute;
@@ -270,6 +290,7 @@ button:disabled {
 }
 
 
+/* Style .login-btn; presentation rules do not change queue data or permissions. */
 .login-btn {
 
     width: 100%;
@@ -294,6 +315,7 @@ button:disabled {
 }
 
 
+/* Style .login-btn:hover; presentation rules do not change queue data or permissions. */
 .login-btn:hover {
 
     background:
@@ -304,6 +326,7 @@ button:disabled {
 }
 
 
+/* Style .login-message; presentation rules do not change queue data or permissions. */
 .login-message {
 
     min-height: 22px;
@@ -314,6 +337,7 @@ button:disabled {
 }
 
 
+/* Style .login-message.error; presentation rules do not change queue data or permissions. */
 .login-message.error {
 
     color:
@@ -321,6 +345,7 @@ button:disabled {
 }
 
 
+/* Style .login-message.success; presentation rules do not change queue data or permissions. */
 .login-message.success {
 
     color:
@@ -328,6 +353,7 @@ button:disabled {
 }
 
 
+/* Style .login-footer; presentation rules do not change queue data or permissions. */
 .login-footer {
 
     text-align: center;
@@ -346,6 +372,7 @@ button:disabled {
    DASHBOARD HEADER
    ========================================================= */
 
+/* Style .dashboard-header; presentation rules do not change queue data or permissions. */
 .dashboard-header {
 
     min-height: 82px;
@@ -369,6 +396,7 @@ button:disabled {
 }
 
 
+/* Style .brand-section h1; presentation rules do not change queue data or permissions. */
 .brand-section h1 {
 
     font-size: 23px;
@@ -377,6 +405,7 @@ button:disabled {
 }
 
 
+/* Style .brand-section p; presentation rules do not change queue data or permissions. */
 .brand-section p {
 
     font-size: 13px;
@@ -385,6 +414,7 @@ button:disabled {
 }
 
 
+/* Style .staff-info; presentation rules do not change queue data or permissions. */
 .staff-info {
 
     display: flex;
@@ -397,6 +427,7 @@ button:disabled {
 }
 
 
+/* Style .staff-info strong; presentation rules do not change queue data or permissions. */
 .staff-info strong {
 
     display: block;
@@ -405,6 +436,7 @@ button:disabled {
 }
 
 
+/* Style .staff-info p; presentation rules do not change queue data or permissions. */
 .staff-info p {
 
     font-size: 12px;
@@ -415,6 +447,7 @@ button:disabled {
 }
 
 
+/* Style .status; presentation rules do not change queue data or permissions. */
 .status {
 
     display: inline-flex;
@@ -431,6 +464,7 @@ button:disabled {
 }
 
 
+/* Style .status::before; presentation rules do not change queue data or permissions. */
 .status::before {
 
     content: "";
@@ -450,6 +484,7 @@ button:disabled {
    PAGE INTRO
    ========================================================= */
 
+/* Style .page-intro; presentation rules do not change queue data or permissions. */
 .page-intro {
 
     padding:
@@ -465,6 +500,7 @@ button:disabled {
 }
 
 
+/* Style .page-intro h2; presentation rules do not change queue data or permissions. */
 .page-intro h2 {
 
     font-size: 28px;
@@ -476,6 +512,7 @@ button:disabled {
 }
 
 
+/* Style .page-intro p; presentation rules do not change queue data or permissions. */
 .page-intro p {
 
     color:
@@ -485,6 +522,7 @@ button:disabled {
 }
 
 
+/* Style .date-time; presentation rules do not change queue data or permissions. */
 .date-time {
 
     display: flex;
@@ -502,6 +540,7 @@ button:disabled {
 }
 
 
+/* Style .date-time strong; presentation rules do not change queue data or permissions. */
 .date-time strong {
 
     color:
@@ -514,6 +553,7 @@ button:disabled {
    SERVICE CONTEXT
    ========================================================= */
 
+/* Style .service-context; presentation rules do not change queue data or permissions. */
 .service-context {
 
     margin:
@@ -542,6 +582,7 @@ button:disabled {
 }
 
 
+/* Style .service-context > div; presentation rules do not change queue data or permissions. */
 .service-context > div {
 
     display: flex;
@@ -552,6 +593,7 @@ button:disabled {
 }
 
 
+/* Style .context-label; presentation rules do not change queue data or permissions. */
 .context-label {
 
     font-size: 10px;
@@ -566,6 +608,7 @@ button:disabled {
 }
 
 
+/* Style .service-context strong; presentation rules do not change queue data or permissions. */
 .service-context strong {
 
     color:
@@ -580,6 +623,7 @@ button:disabled {
    SUMMARY CARDS
    ========================================================= */
 
+/* Style .summary-cards; presentation rules do not change queue data or permissions. */
 .summary-cards {
 
     padding:
@@ -594,6 +638,7 @@ button:disabled {
 }
 
 
+/* Style .card; presentation rules do not change queue data or permissions. */
 .card {
 
     background:
@@ -617,6 +662,7 @@ button:disabled {
 }
 
 
+/* Style .card::before; presentation rules do not change queue data or permissions. */
 .card::before {
 
     content: "";
@@ -634,6 +680,7 @@ button:disabled {
 }
 
 
+/* Style .card h3; presentation rules do not change queue data or permissions. */
 .card h3 {
 
     font-size: 12px;
@@ -647,6 +694,7 @@ button:disabled {
 }
 
 
+/* Style .card p; presentation rules do not change queue data or permissions. */
 .card p {
 
     font-size: 25px;
@@ -663,6 +711,7 @@ button:disabled {
    MAIN CONTENT
    ========================================================= */
 
+/* Style .dashboard-content; presentation rules do not change queue data or permissions. */
 .dashboard-content {
 
     padding:
@@ -680,6 +729,7 @@ button:disabled {
 
 .queue-section,
 .service-section,
+/* Style .availability-section; presentation rules do not change queue data or permissions. */
 .availability-section {
 
     background:
@@ -698,6 +748,7 @@ button:disabled {
 }
 
 
+/* Style .queue-section; presentation rules do not change queue data or permissions. */
 .queue-section {
 
     grid-row:
@@ -705,6 +756,7 @@ button:disabled {
 }
 
 
+/* Style .section-header; presentation rules do not change queue data or permissions. */
 .section-header {
 
     padding:
@@ -723,6 +775,7 @@ button:disabled {
 }
 
 
+/* Style .section-header h2; presentation rules do not change queue data or permissions. */
 .section-header h2 {
 
     color:
@@ -734,6 +787,7 @@ button:disabled {
 }
 
 
+/* Style .section-header p; presentation rules do not change queue data or permissions. */
 .section-header p {
 
     color:
@@ -743,6 +797,7 @@ button:disabled {
 }
 
 
+/* Style .section-header button; presentation rules do not change queue data or permissions. */
 .section-header button {
 
     border: none;
@@ -764,6 +819,7 @@ button:disabled {
 }
 
 
+/* Style .section-header button:hover; presentation rules do not change queue data or permissions. */
 .section-header button:hover {
 
     background:
@@ -776,6 +832,7 @@ button:disabled {
    MESSAGES
    ========================================================= */
 
+/* Style .dashboard-message; presentation rules do not change queue data or permissions. */
 .dashboard-message {
 
     min-height: 0;
@@ -790,6 +847,7 @@ button:disabled {
 }
 
 
+/* Style .dashboard-message:not(:empty); presentation rules do not change queue data or permissions. */
 .dashboard-message:not(:empty) {
 
     padding-top: 12px;
@@ -798,6 +856,7 @@ button:disabled {
 }
 
 
+/* Style .dashboard-message.error; presentation rules do not change queue data or permissions. */
 .dashboard-message.error {
 
     color:
@@ -805,6 +864,7 @@ button:disabled {
 }
 
 
+/* Style .dashboard-message.success; presentation rules do not change queue data or permissions. */
 .dashboard-message.success {
 
     color:
@@ -817,6 +877,7 @@ button:disabled {
    QUEUE TABLE
    ========================================================= */
 
+/* Style .queue-table-container; presentation rules do not change queue data or permissions. */
 .queue-table-container {
 
     width: 100%;
@@ -825,6 +886,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table; presentation rules do not change queue data or permissions. */
 .queue-table {
 
     width: 100%;
@@ -837,6 +899,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table th; presentation rules do not change queue data or permissions. */
 .queue-table th {
 
     background:
@@ -863,6 +926,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table td; presentation rules do not change queue data or permissions. */
 .queue-table td {
 
     padding:
@@ -875,6 +939,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table tbody tr; presentation rules do not change queue data or permissions. */
 .queue-table tbody tr {
 
     transition:
@@ -882,6 +947,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table tbody tr:hover; presentation rules do not change queue data or permissions. */
 .queue-table tbody tr:hover {
 
     background:
@@ -889,6 +955,7 @@ button:disabled {
 }
 
 
+/* Style .queue-table tbody tr.active-row; presentation rules do not change queue data or permissions. */
 .queue-table tbody tr.active-row {
 
     background:
@@ -896,6 +963,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status; presentation rules do not change queue data or permissions. */
 .queue-status {
 
     display: inline-flex;
@@ -911,6 +979,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status.waiting; presentation rules do not change queue data or permissions. */
 .queue-status.waiting {
 
     background:
@@ -921,6 +990,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status.called; presentation rules do not change queue data or permissions. */
 .queue-status.called {
 
     background:
@@ -931,6 +1001,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status.serving; presentation rules do not change queue data or permissions. */
 .queue-status.serving {
 
     background:
@@ -941,6 +1012,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status.completed; presentation rules do not change queue data or permissions. */
 .queue-status.completed {
 
     background:
@@ -951,6 +1023,7 @@ button:disabled {
 }
 
 
+/* Style .queue-status.skipped; presentation rules do not change queue data or permissions. */
 .queue-status.skipped {
 
     background:
@@ -961,6 +1034,7 @@ button:disabled {
 }
 
 
+/* Style .row-call-btn; presentation rules do not change queue data or permissions. */
 .row-call-btn {
 
     border:
@@ -984,6 +1058,7 @@ button:disabled {
 }
 
 
+/* Style .row-call-btn:hover; presentation rules do not change queue data or permissions. */
 .row-call-btn:hover {
 
     background:
@@ -991,6 +1066,7 @@ button:disabled {
 }
 
 
+/* Style .no-action; presentation rules do not change queue data or permissions. */
 .no-action {
 
     color:
@@ -999,6 +1075,7 @@ button:disabled {
 
 
 .loading-cell,
+/* Style .empty-cell; presentation rules do not change queue data or permissions. */
 .empty-cell {
 
     text-align:
@@ -1017,6 +1094,7 @@ button:disabled {
    CURRENT SERVICE
    ========================================================= */
 
+/* Style .current-service; presentation rules do not change queue data or permissions. */
 .current-service {
 
     padding:
@@ -1030,6 +1108,7 @@ button:disabled {
 }
 
 
+/* Style .current-service > div; presentation rules do not change queue data or permissions. */
 .current-service > div {
 
     min-width:
@@ -1043,6 +1122,7 @@ button:disabled {
 }
 
 
+/* Style .current-service span; presentation rules do not change queue data or permissions. */
 .current-service span {
 
     font-size: 11px;
@@ -1054,6 +1134,7 @@ button:disabled {
 }
 
 
+/* Style .current-service strong; presentation rules do not change queue data or permissions. */
 .current-service strong {
 
     color:
@@ -1063,6 +1144,7 @@ button:disabled {
 }
 
 
+/* Style .service-state; presentation rules do not change queue data or permissions. */
 .service-state {
 
     display: inline-block;
@@ -1081,6 +1163,7 @@ button:disabled {
 }
 
 
+/* Style .service-state.idle; presentation rules do not change queue data or permissions. */
 .service-state.idle {
 
     background:
@@ -1091,6 +1174,7 @@ button:disabled {
 }
 
 
+/* Style .service-state.called; presentation rules do not change queue data or permissions. */
 .service-state.called {
 
     background:
@@ -1101,6 +1185,7 @@ button:disabled {
 }
 
 
+/* Style .service-state.serving; presentation rules do not change queue data or permissions. */
 .service-state.serving {
 
     background:
@@ -1111,6 +1196,7 @@ button:disabled {
 }
 
 
+/* Style .service-state.completed; presentation rules do not change queue data or permissions. */
 .service-state.completed {
 
     background:
@@ -1121,6 +1207,7 @@ button:disabled {
 }
 
 
+/* Style .service-state.skipped; presentation rules do not change queue data or permissions. */
 .service-state.skipped {
 
     background:
@@ -1131,6 +1218,7 @@ button:disabled {
 }
 
 
+/* Style .service-actions; presentation rules do not change queue data or permissions. */
 .service-actions {
 
     width: 100%;
@@ -1147,6 +1235,7 @@ button:disabled {
 }
 
 
+/* Style .service-actions button; presentation rules do not change queue data or permissions. */
 .service-actions button {
 
     border: none;
@@ -1168,6 +1257,7 @@ button:disabled {
 }
 
 
+/* Style .service-actions button:hover; presentation rules do not change queue data or permissions. */
 .service-actions button:hover {
 
     background:
@@ -1175,6 +1265,7 @@ button:disabled {
 }
 
 
+/* Style .insight-wide; presentation rules do not change queue data or permissions. */
 .insight-wide {
 
     flex: 1;
@@ -1187,6 +1278,7 @@ button:disabled {
    AVAILABILITY
    ========================================================= */
 
+/* Style .availability-section; presentation rules do not change queue data or permissions. */
 .availability-section {
 
     grid-column:
@@ -1195,6 +1287,7 @@ button:disabled {
 }
 
 
+/* Style .availability-controls; presentation rules do not change queue data or permissions. */
 .availability-controls {
 
     padding:
@@ -1208,6 +1301,7 @@ button:disabled {
 }
 
 
+/* Style .availability-controls button; presentation rules do not change queue data or permissions. */
 .availability-controls button {
 
     border:
@@ -1231,6 +1325,7 @@ button:disabled {
 }
 
 
+/* Style .availability-controls button:hover; presentation rules do not change queue data or permissions. */
 .availability-controls button:hover {
 
     border-color:
@@ -1241,6 +1336,7 @@ button:disabled {
 }
 
 
+/* Style .availability-badge; presentation rules do not change queue data or permissions. */
 .availability-badge {
 
     font-size: 10px;
@@ -1255,6 +1351,7 @@ button:disabled {
 }
 
 
+/* Style .availability-badge.available; presentation rules do not change queue data or permissions. */
 .availability-badge.available {
 
     background:
@@ -1265,6 +1362,7 @@ button:disabled {
 }
 
 
+/* Style .availability-badge.paused; presentation rules do not change queue data or permissions. */
 .availability-badge.paused {
 
     background:
@@ -1275,6 +1373,7 @@ button:disabled {
 }
 
 
+/* Style .availability-badge.checked-out; presentation rules do not change queue data or permissions. */
 .availability-badge.checked-out {
 
     background:
@@ -1290,6 +1389,7 @@ button:disabled {
    RECENT ACTIVITY
    ========================================================= */
 
+/* Style .activity-list; presentation rules do not change queue data or permissions. */
 .activity-list {
 
     padding:
@@ -1297,6 +1397,7 @@ button:disabled {
 }
 
 
+/* Style .activity-item; presentation rules do not change queue data or permissions. */
 .activity-item {
 
     display: flex;
@@ -1311,6 +1412,7 @@ button:disabled {
 }
 
 
+/* Style .activity-item:last-child; presentation rules do not change queue data or permissions. */
 .activity-item:last-child {
 
     border-bottom:
@@ -1318,6 +1420,7 @@ button:disabled {
 }
 
 
+/* Style .activity-dot; presentation rules do not change queue data or permissions. */
 .activity-dot {
 
     flex: 0 0 auto;
@@ -1335,6 +1438,7 @@ button:disabled {
 }
 
 
+/* Style .activity-item div; presentation rules do not change queue data or permissions. */
 .activity-item div {
 
     display: flex;
@@ -1345,6 +1449,7 @@ button:disabled {
 }
 
 
+/* Style .activity-item strong; presentation rules do not change queue data or permissions. */
 .activity-item strong {
 
     font-size: 12px;
@@ -1354,6 +1459,7 @@ button:disabled {
 }
 
 
+/* Style .activity-item span; presentation rules do not change queue data or permissions. */
 .activity-item span {
 
     font-size: 11px;
@@ -1368,6 +1474,7 @@ button:disabled {
    FOOTER
    ========================================================= */
 
+/* Style .dashboard-footer; presentation rules do not change queue data or permissions. */
 .dashboard-footer {
 
     padding:
@@ -1391,6 +1498,7 @@ button:disabled {
    RESPONSIVE
    ========================================================= */
 
+/* Adapt styles to this screen width or preference. */
 @media (max-width: 1100px) {
 
     .summary-cards {
@@ -1422,6 +1530,7 @@ button:disabled {
 }
 
 
+/* Adapt styles to this screen width or preference. */
 @media (max-width: 700px) {
 
     .dashboard-header {
@@ -1511,6 +1620,7 @@ button:disabled {
 }
 
 
+/* Adapt styles to this screen width or preference. */
 @media (max-width: 480px) {
 
     .summary-cards {

@@ -1,3 +1,4 @@
+// VIVA GUIDE: Explicit regression/fixture tool: inspect assertions and cleanup; database checks use their configured database. Standalone test or diagnostic program. Read fixture setup, assertions and cleanup; do not assume Maven package executes this file.
 import com.queue.service.*;
 import com.queue.util.DBConnection;
 import java.sql.*;
@@ -9,14 +10,23 @@ class DailyReservationChecks {
     static int checks,service,counter,otherCounter,staff,otherStaff;
     static final List<Integer> students=new ArrayList<>();
     static final LocalDate day=ServiceHours.now().toLocalDate().plusDays(2);
+    // Operation check: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static void check(boolean condition,String label){if(!condition)throw new AssertionError(label);System.out.println("PASS "+label);checks++;}
+    // Operation at: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static LocalDateTime at(int h,int m){return day.atTime(h,m);}
+    // Operation insert: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static int insert(String sql,Object...values)throws Exception{try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement(sql,Statement.RETURN_GENERATED_KEYS)){for(int i=0;i<values.length;i++)p.setObject(i+1,values[i]);p.executeUpdate();try(ResultSet r=p.getGeneratedKeys()){r.next();return r.getInt(1);}}}
+    // Operation n: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static int n(Map<String,Object> map,String key){return ((Number)map.get(key)).intValue();}
+    // Operation fails: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static void fails(Callable<?> work,String label)throws Exception{try{work.call();throw new AssertionError(label);}catch(IllegalArgumentException expected){check(true,label);}}
+    // Operation sql: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static void sql(String sql,Object...values)throws Exception{try(Connection c=DBConnection.getConnection();PreparedStatement p=c.prepareStatement(sql)){for(int i=0;i<values.length;i++)p.setObject(i+1,values[i]);p.executeUpdate();}}
+    // Perform call; inspect its conditions, affected rows and return value before describing success.
     static Map<String,Object> call(ReservationService r,int id)throws Exception{return r.operate(id,"call-next",0);}
+    // Operation finish: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static void finish(ReservationService r,int operator,int id)throws Exception{r.operate(operator,"start",id);r.operate(operator,"complete",id);}
+    // Standalone entry point: runs this diagnostic/setup/check explicitly; Maven packaging does not automatically execute it.
     public static void main(String[] args)throws Exception {
         check(!ServiceHours.open(at(9,59))&&ServiceHours.open(at(10,0)),"opening boundary is 10 AM");
         check(!ServiceHours.open(at(13,0))&&ServiceHours.open(at(14,0)),"break and reopening boundaries");
@@ -130,5 +140,6 @@ class DailyReservationChecks {
             }catch(Exception error){c.rollback();throw error;}}
         }
     }
+    // Operation throwConflict: follow the inputs, validation and return value in the block below; the file header explains its layer/caller.
     static Object throwConflict(){throw new IllegalArgumentException("Not owned");}
 }

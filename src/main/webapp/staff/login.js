@@ -1,3 +1,4 @@
+// VIVA GUIDE: Retained JSP staff-login browser helper; distinguish it from frontend/src/pages/StaffLogin.jsx.
 const loginForm = document.getElementById("loginForm");
 const loginButton = document.getElementById("loginButton");
 const loginMessage = document.getElementById("loginMessage");

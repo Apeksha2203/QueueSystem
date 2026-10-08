@@ -2,6 +2,8 @@
 
 Start with the presentation runbook for the demonstration sequence, then use the master guide for technical preparation.
 
+- [Commented code study index](CODE-STUDY-INDEX.md): where to study current source, how to use inline viva comments, and explanations for files that cannot contain comments.
+
 - [Master PDF](../output/pdf/Campus-Queue-Master-Guide.pdf): architecture, modules, queue rules, tokens, measured ETA, SQL exercises, Java/React explanations, viva questions, deployment costs/troubleshooting, limitations, file inventory and numbered source appendix.
 - [Presentation PDF](../output/pdf/Campus-Queue-Presentation-Runbook.pdf): ordered demonstration, suggested talk track, team handoffs, code/database tour, rehearsal questions and failure recovery.
 - [Student frontend preparation PDF](../output/pdf/Campus-Queue-Student-Frontend-Preparation.pdf): personal speaking notes, packages, active and retained files, API flow, React concepts and viva answers.

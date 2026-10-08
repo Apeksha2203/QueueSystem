@@ -1,15 +1,21 @@
+// VIVA GUIDE: Retained earlier student implementation, outside the current main.jsx -> App.jsx import path. Older student page retained alongside the current App.jsx component implementation. Check imports before treating it as an active production screen.
 import React, { useEffect, useState } from 'react';
 import { Users, Timer, XCircle } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import gsap from 'gsap';
 
+// Arrow-function helper Queue: keeps this operation reusable at its call sites.
 const Queue = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [targetWaitTime] = useState(18);
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [targetPeople] = useState(4);
+  // Component state: the setter updates this value and triggers a render; the initial value is not server authorization.
   const [serviceName, setServiceName] = useState("Service Queue");
 
+  // React side effect: inspect dependencies and cleanup to avoid stale requests, duplicate timers or leftover animations.
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('name')) {
@@ -23,6 +29,7 @@ const Queue = () => {
     gsap.to(document.getElementById('peopleAheadDisplay'), { innerHTML: targetPeople, duration: 1.5, snap: { innerHTML: 1 }, ease: "power1.out" });
   }, [location.search, targetWaitTime, targetPeople]);
 
+  // Arrow-function helper cancelQueue: keeps this operation reusable at its call sites.
   const cancelQueue = () => {
     if (window.confirm("Are you sure you want to cancel your queue token?")) {
       navigate('/dashboard');

@@ -127,6 +127,13 @@ class DailyReservationChecks {
             finish(closed,staff,called);closed.operate(otherStaff,"complete",serving);
             check(closed.staffQueue(staff).isEmpty(),"both assigned students can finish after closing");
             check(new ReservationService(day.plusDays(1).atTime(7,30)).preview(students.get(2),service).get("queueId")!=null,"unserved tickets remain active next day");
+            ReservationService midnight=new ReservationService(day.plusDays(1).atStartOfDay());
+            Map<String,Object> midnightBooking=midnight.reserve(students.get(7),service);
+            check(n(midnightBooking,"position")==6 && Boolean.TRUE.equals(midnightBooking.get("canReserve")),"midnight prebooking appends behind five carried tickets");
+            // Simulate missed overnight reconciliation: reserve itself must catch up before assigning position.
+            sql("UPDATE queue_reservations SET visit_date=? WHERE queue_id=?",day,lateTickets.get(2));
+            Map<String,Object> afterRestart=midnight.reserve(students.get(8),service);
+            check(n(afterRestart,"position")==7,"midnight reservation catches overdue tickets before allocating new order");
             sql("DELETE FROM queue WHERE service_id=? AND status='WAITING'",service);
             int morningTicket=n(early.reserve(students.get(0),service),"queueId");early.reserve(students.get(1),service);
             ReservationService morning=new ReservationService(at(12,55)),afternoon=new ReservationService(at(14,0));call(morning,staff);morning.operate(staff,"start",morningTicket);

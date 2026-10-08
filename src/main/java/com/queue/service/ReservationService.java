@@ -82,6 +82,9 @@ public class ReservationService {
     }
     // Locks the service row, rechecks availability, allocates token/order and inserts ticket, reservation and audit event in one transaction.
     public Map<String,Object> reserve(int student,int service)throws SQLException {
+        // Catch up after midnight or a sleeping/restarted server before assigning today's new position.
+        // Carryover tickets are moved ahead first; a new booking appends after their queue_order values.
+        if (now().toLocalTime().isBefore(LocalTime.of(15,0))) closeWaiting(service);
         try(Connection c=DBConnection.getConnection()) {
             // Use READ_COMMITTED and explicit transactions so service-row locks protect a consistent validation/write sequence.
             c.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);c.setAutoCommit(false);

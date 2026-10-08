@@ -101,3 +101,6 @@ Added file, method/component and key-rule explanations across 116 source/configu
 # Student catalogue loading recovery - 8 October 2026
 
 Verified the live catalogue contains all three services and the before-opening reservation preview returns canReserve=true with a 10 AM estimate. Fixed frontend loading: catalogue appears independently of slow overview/history requests, polling shares outstanding refreshes, cloud requests allow a 60-second wake-up window, and the dashboard distinguishes loading/errors from a genuinely empty successful catalogue. No operating-hour or prebooking rules changed. Student production build and the focused student-loading regression check passed.
+# Midnight prebooking priority - 8 October 2026
+
+New-day prebooking is available from 00:00 Asia/Kolkata. Reservation creation reconciles overdue waiting tickets before assigning new daily order, so carryovers precede new bookings even after backend sleep/restart. Rejected after-closing requests do not trigger that catch-up path. All 65 daily reservation checks passed against local fixtures, including two midnight/carryover regression cases; test fixtures were removed.
